@@ -1,0 +1,23 @@
+<mat-toolbar class="bg-sky-600! justify-between">
+  <ul class="flex gap-2">
+    @for (link of navLinks; track link) {
+      <li>
+        <a
+          mat-button
+          class="bg-sky-800 text-white! font-bold!"
+          [routerLink]="['/', link.toLowerCase()]"
+          >{{ link }}</a
+        >
+      </li>
+    }
+  </ul>
+
+  <div class="flex gap-2 items-center">
+    <mat-form-field appearance="outline" class="no-subscript w-[250px]">
+      <mat-label>Search</mat-label>
+      <input type="text" matInput [(ngModel)]="searchString" />
+    </mat-form-field>
+
+    <button matButton="filled" class="bg-sky-300! text-white! h-[40px]! font-bold!">Search</button>
+  </div>
+</mat-toolbar>

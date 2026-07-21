@@ -1,0 +1,45 @@
+.example-spacer {
+  /* flex: 1 1 auto; */
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: auto;
+  /* background-color: red; */
+}
+
+:host ::ng-deep .no-subscript .mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+}
+
+:host ::ng-deep .no-subscript .mat-mdc-form-field-flex {
+  align-items: center !important;
+  width: 100%;
+  background-color: red;
+}
+
+:host ::ng-deep .no-subscript .mat-mdc-form-field-infix {
+  min-height: unset !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  height: 40px !important;
+  background-color: white;
+  line-height: 40px;
+  text-indent: 5px;
+}
+:host ::ng-deep .no-subscript .mat-mdc-floating-label {
+  top: 50% !important;
+  transform: translate(0, -50%);
+  transition: transform 500ms !important;
+}
+
+:host ::ng-deep .no-subscript.mat-form-field-animations .mdc-floating-label--float-above,
+:host ::ng-deep .no-subscript .mdc-floating-label--float-above {
+  top: 0% !important;
+  transform: translateY(-30%) scale(0) !important;
+}
+
+:host ::ng-deep .no-subscript .mdc-notched-outline,
+:host ::ng-deep .no-subscript .mdc-notched-outline__leading,
+:host ::ng-deep .no-subscript .mdc-notched-outline__notch,
+:host ::ng-deep .no-subscript .mdc-notched-outline__trailing {
+  border: none !important;
+}
