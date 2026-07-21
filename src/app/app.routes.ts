@@ -5,16 +5,16 @@ export const routes: Routes = [
   {
     path: 'home',
     loadComponent: () =>
-      import('./components/home-component/home-component').then((c) => c.HomeComponent),
+      import('./pages/home-component/home-component').then((c) => c.HomeComponent),
   },
   {
     path: 'favorit',
     loadComponent: () =>
-      import('./components/favorite-component/favorite-component').then((c) => c.FavoriteComponent),
+      import('./pages/favorite-component/favorite-component').then((c) => c.FavoriteComponent),
   },
   {
     path: 'login',
     loadComponent: () =>
-      import('./components/login-component/login-component').then((c) => c.LoginComponent),
+      import('./pages/login-component/login-component').then((c) => c.LoginComponent),
   },
 ];

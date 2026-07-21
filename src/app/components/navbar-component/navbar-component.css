@@ -1,11 +1,4 @@
-.example-spacer {
-  /* flex: 1 1 auto; */
-  flex-grow: 1;
-  flex-shrink: 1;
-  flex-basis: auto;
-  /* background-color: red; */
-}
-
+/* NavbarComponent.css */
 :host ::ng-deep .no-subscript .mat-mdc-form-field-subscript-wrapper {
   display: none !important;
 }
@@ -27,6 +20,7 @@
 }
 :host ::ng-deep .no-subscript .mat-mdc-floating-label {
   top: 50% !important;
+  left: 10px;
   transform: translate(0, -50%);
   transition: transform 500ms !important;
 }
