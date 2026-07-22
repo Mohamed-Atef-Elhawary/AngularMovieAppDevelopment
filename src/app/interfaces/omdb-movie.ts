@@ -7,6 +7,6 @@ export interface OmdbMovieSearch {
 }
 export interface OmdbMovieResponse {
   Response: string;
-  totalResult: string;
+  totalResults: string;
   Search: OmdbMovieSearch[];
 }

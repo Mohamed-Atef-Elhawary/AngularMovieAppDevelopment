@@ -14,6 +14,6 @@ import { RouterLink } from '@angular/router';
   styleUrls: ['./navbar-component.css'],
 })
 export class NavbarComponent {
-  navLinks: string[] = ['Home', 'Favorit', 'Login'];
+  navLinks: string[] = ['Home', 'Favorite', 'Login'];
   searchString: string = '';
 }
