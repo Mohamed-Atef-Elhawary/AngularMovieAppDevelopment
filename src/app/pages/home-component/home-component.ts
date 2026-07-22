@@ -4,7 +4,7 @@ import { OmdbMovieResponse, OmdbMovieSearch } from '../../interfaces/omdb-movie'
 import { MovieService } from '../../services/movie-service';
 import { MovieCardComponent } from '../../components/movie-card-component/movie-card-component';
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MyCustomPaginatorIntl } from '../../services/my-custom-pagenator-init';
+import { MyCustomPaginatorIntl } from '../../services/my-custom-paginator-init';
 
 @Component({
   selector: 'app-home-component',
@@ -29,7 +29,6 @@ export class HomeComponent {
     this.movieService.getPageMovies(this.pageIndex()).subscribe({
       next: (res) => {
         this.omdbMovieResponse.set(res);
-        console.log(this.omdbMovieResponse().totalResults);
       },
       error: (err) => {
         console.log('err', err);

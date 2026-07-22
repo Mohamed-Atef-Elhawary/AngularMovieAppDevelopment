@@ -10,3 +10,6 @@ export interface OmdbMovieResponse {
   totalResults: string;
   Search: OmdbMovieSearch[];
 }
+export interface FavoriteMovie extends OmdbMovieSearch {
+  docId: string;
+}

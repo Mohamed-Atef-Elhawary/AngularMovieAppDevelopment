@@ -18,6 +18,12 @@
     </h3>
   </mat-card-content>
   <mat-card-actions>
-    <button matButton class="rounded-none! w-full! border! text-indego-700!">Favorite</button>
+    <button
+      matButton
+      class="rounded-none! w-full! border! text-indego-700!"
+      (click)="addFavorite()"
+    >
+      Favorite
+    </button>
   </mat-card-actions>
 </mat-card>

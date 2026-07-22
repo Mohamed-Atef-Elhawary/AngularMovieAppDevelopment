@@ -8,7 +8,7 @@ export const routes: Routes = [
       import('./pages/home-component/home-component').then((c) => c.HomeComponent),
   },
   {
-    path: 'favorit',
+    path: 'favorite',
     loadComponent: () =>
       import('./pages/favorite-component/favorite-component').then((c) => c.FavoriteComponent),
   },

@@ -1,1 +1,19 @@
-<p>favorite-component works!</p>
+<div class="lex min-h-[calc(100dvh_-_60px)] flex-col justify-between">
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-1 p-2">
+    @for (
+      movie of favoriteMovies() | slice: slicleRange() * 10 : (slicleRange() + 1) * 10;
+      track movie.docId
+    ) {
+      <app-movie-card-component [movieInput]="movie"></app-movie-card-component>
+    }
+  </div>
+
+  <mat-paginator
+    [length]="totalResults()"
+    [pageSize]="10"
+    (page)="onPageChange($event)"
+    aria-label="Select page"
+    class="bg-gray-200!"
+  >
+  </mat-paginator>
+</div>
