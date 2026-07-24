@@ -21,9 +21,9 @@
     <button
       matButton
       class="rounded-none! w-full! border! text-indego-700!"
-      (click)="addFavorite()"
+      (click)="toggleFavorite()"
     >
-      Favorite
+      {{ movie().isFavorite ? 'UnFivorite' : 'Fivorite' }}
     </button>
   </mat-card-actions>
 </mat-card>

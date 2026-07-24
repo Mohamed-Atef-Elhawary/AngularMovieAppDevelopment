@@ -4,6 +4,7 @@ export interface OmdbMovieSearch {
   Type: string;
   Year: string;
   imdbID: string;
+  isFavorite: boolean;
 }
 export interface OmdbMovieResponse {
   Response: string;

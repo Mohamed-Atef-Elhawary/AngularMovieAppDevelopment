@@ -1,4 +1,4 @@
-<div class="lex min-h-[calc(100dvh_-_60px)] flex-col justify-between">
+<div class="lex min-h-[calc(100dvh_-_60px)] flex flex-col justify-between">
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-1 p-2">
     @for (
       movie of favoriteMovies() | slice: slicleRange() * 10 : (slicleRange() + 1) * 10;

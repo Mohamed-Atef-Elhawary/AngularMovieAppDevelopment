@@ -31,8 +31,8 @@ export class FavoriteService {
   }
 
   addFavorite(movie: OmdbMovieSearch): Observable<any> {
-    const { Poster, Title, Type, Year, imdbID } = movie;
-    return from(addDoc(this.favCollection, { Poster, Title, Type, Year, imdbID }));
+    const { Poster, Title, Type, Year, imdbID, isFavorite } = movie;
+    return from(addDoc(this.favCollection, { Poster, Title, Type, Year, imdbID, isFavorite }));
   }
 
   removeFavorite(docId: string): Observable<void> {
