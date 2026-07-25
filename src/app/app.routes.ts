@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -11,6 +12,7 @@ export const routes: Routes = [
     path: 'favorite',
     loadComponent: () =>
       import('./pages/favorite-component/favorite-component').then((c) => c.FavoriteComponent),
+    canActivate: [authGuard],
   },
   {
     path: 'login',

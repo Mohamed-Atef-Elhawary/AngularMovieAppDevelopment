@@ -143,6 +143,7 @@ export class LoginComponent implements OnInit {
       this.authService.register(this.loginForm.value).subscribe({
         next: (response) => {
           this.authService.setUserId(response.user.uid);
+          this.authService.clearLocalStorage();
           this.router.navigate(['/home']);
         },
         error: (err) => {

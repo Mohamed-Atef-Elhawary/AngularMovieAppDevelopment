@@ -1,6 +1,6 @@
 <!-- homePage.html -->
 <div class="flex flex-col justify-between min-h-[calc(100dvh-60px)]">
-  <div class="grid grid-cols sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-1 m-2">
+  <div class="grid grid-cols sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 m-2">
     @for (movie of movieList(); track $index) {
       <app-movie-card-component [movieInput]="movie"></app-movie-card-component>
     }

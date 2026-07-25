@@ -9,34 +9,62 @@ import {
   CollectionReference,
   DocumentData,
 } from 'firebase/firestore';
-import { Observable, from } from 'rxjs';
+import { Observable, from, throwError } from 'rxjs';
 import { FavoriteMovie, OmdbMovieSearch } from '../interfaces/omdb-movie';
+import { AuthService } from './auth-service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FavoriteService {
-  private firestore: Firestore = inject(Firestore);
-  private favCollection: CollectionReference<DocumentData, DocumentData> = collection(
-    this.firestore,
-    'favorites',
-  );
+  favCollection!: CollectionReference<DocumentData, DocumentData>;
+  constructor(
+    private firestore: Firestore,
+    private authService: AuthService,
+  ) {}
+  ngonInit() {
+    this.favCollection = collection(this.firestore, 'favorites');
+  }
+
+  getUserFavoritesPath(): string {
+    const currentUid = this.authService.uid();
+    if (currentUid) {
+      return `users/${currentUid}/favorites`;
+    }
+    throw new Error('[FavoriteService]: Cannot resolve path. User is not authenticated.');
+  }
 
   getFavorites(): Observable<FavoriteMovie[]> {
-    return from(
-      getDocs(this.favCollection).then((snapshot) =>
-        snapshot.docs.map((d) => ({ docId: d.id, ...d.data() }) as FavoriteMovie),
-      ),
-    );
+    try {
+      const path = this.getUserFavoritesPath();
+      const favCollection = collection(this.firestore, path);
+      return from(
+        getDocs(favCollection).then((snapshot) =>
+          snapshot.docs.map((d) => ({ docId: d.id, ...d.data() }) as FavoriteMovie),
+        ),
+      );
+    } catch (err) {
+      return throwError(() => err);
+    }
   }
 
   addFavorite(movie: OmdbMovieSearch): Observable<any> {
-    const { Poster, Title, Type, Year, imdbID, isFavorite } = movie;
-    return from(addDoc(this.favCollection, { Poster, Title, Type, Year, imdbID, isFavorite }));
+    try {
+      const path = this.getUserFavoritesPath();
+      const favCollection = collection(this.firestore, path);
+      return from(addDoc(favCollection, movie));
+    } catch (err) {
+      return throwError(() => err);
+    }
   }
 
   removeFavorite(docId: string): Observable<void> {
-    const docRef = doc(this.firestore, `favorites/${docId}`);
-    return from(deleteDoc(docRef));
+    try {
+      const currentUid = this.authService.uid();
+      const docRef = doc(this.firestore, `users/${currentUid}/favorites/${docId}`);
+      return from(deleteDoc(docRef));
+    } catch (err) {
+      return throwError(() => err);
+    }
   }
 }

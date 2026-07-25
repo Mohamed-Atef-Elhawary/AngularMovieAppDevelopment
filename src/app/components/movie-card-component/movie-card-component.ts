@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MovieService } from '../../services/movie-service';
 import { FavoriteService } from '../../services/favorite-service';
+import { MovieIntegrationService } from '../../services/movie-integration-service';
 
 @Component({
   selector: 'app-movie-card-component',
@@ -23,9 +24,15 @@ export class MovieCardComponent {
 
   movie = signal<OmdbMovieSearch | FavoriteMovie>({} as OmdbMovieSearch);
 
+  allowed = computed<boolean>(() => {
+    const movie = this.movie();
+    return 'docId' in movie;
+  });
+
   constructor(
     private movieService: MovieService,
     private favoriteService: FavoriteService,
+    private movieIntegrationService: MovieIntegrationService,
   ) {}
 
   ngOnChanges() {
@@ -47,15 +54,18 @@ export class MovieCardComponent {
 
   toggleFavorite() {
     this.movie.update((data) => ({ ...data, isFavorite: !data.isFavorite }));
-    console.log(this.movie());
+
     if (this.movie().isFavorite) {
       this.favoriteService.addFavorite(this.movie()).subscribe();
+      this.movieIntegrationService.newFavMovieSub$.next(this.movie().imdbID);
     } else {
-      let movie = this.movie();
-      if ('docId' in movie) {
-        this.favoriteService.removeFavorite(movie.docId).subscribe();
+      if (this.allowed()) {
+        const movie = this.movie();
+        if ('docId' in movie) {
+          this.movieIntegrationService.newFavMovieSub$.next(this.movie().imdbID);
+          this.favoriteService.removeFavorite(movie.docId).subscribe();
+        }
       }
     }
-    this.movieService.favSub$.next(this.movie().imdbID);
   }
 }

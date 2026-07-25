@@ -5,6 +5,7 @@ import { MovieService } from '../../services/movie-service';
 import { MovieCardComponent } from '../../components/movie-card-component/movie-card-component';
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MyCustomPaginatorIntl } from '../../services/my-custom-paginator-init';
+import { MovieIntegrationService } from '../../services/movie-integration-service';
 
 @Component({
   selector: 'app-home-component',
@@ -15,39 +16,14 @@ import { MyCustomPaginatorIntl } from '../../services/my-custom-paginator-init';
   styleUrl: './home-component.css',
 })
 export class HomeComponent {
-  constructor(private movieService: MovieService) {}
+  constructor(private movieIntegrationService: MovieIntegrationService) {}
 
   movieList = computed<OmdbMovieSearch[]>(() => {
-    console.log(this.movieService.movieList());
-    return this.movieService.movieList();
+    return this.movieIntegrationService.movieList();
   });
-  totalResults = computed<number>(() => this.movieService.totalResults());
+  totalResults = computed<number>(() => this.movieIntegrationService.totalResults());
 
   onPageChange(event: PageEvent) {
-    this.movieService.pageNumber.next(event.pageIndex + 1);
+    this.movieIntegrationService.pageNumbersub$.next(event.pageIndex + 1);
   }
-
-  // movies = signal<OmdbMovieSearch[]>([]);
-  // totalResults = signal<number>(0);
-  // pageIndex = signal<string>('1');
-
-  // ngOnInit() {
-  // this.getPageMovies();
-  // }
-  // getPageMovies() {
-  //   this.movieService.getPageMovies(this.pageIndex()).subscribe({
-  //     next: (res) => {
-  //       this.movies.set(res.Search);
-  //       this.totalResults.set(Number(res.totalResults));
-  //     },
-  //     error: (err) => {
-  //       console.log('err', err);
-  //     },
-  //   });
-  // }
-  // onPageChange(event: PageEvent) {
-  //   this.pageIndex.set(String(event.pageIndex + 1));
-  //   this.movieService.pageNumber.next(event.pageIndex + 1);
-  //   this.getPageMovies();
-  // }
 }
