@@ -1,1 +1,92 @@
-<p>login-component works!</p>
+<div class="flex min-h-[calc(100dvh-60px)]">
+  <form
+    [formGroup]="loginForm"
+    (ngSubmit)="submit()"
+    class="flex flex-col gap-3 w-[300px] m-auto bg-white border border-gray-100 p-4"
+  >
+    <h2 class="font-bold">Login</h2>
+    @if (this.status() === 'register') {
+      <mat-form-field appearance="outline" class="overflow-hidden py-2">
+        <mat-label>Enter your name</mat-label>
+        <input matInput placeholder="Full Name" formControlName="fullName" />
+        <mat-hint></mat-hint>
+        @if (fullName?.touched && fullName?.hasError('required')) {
+          <mat-error>Name is <strong>required</strong></mat-error>
+        } @else if (fullName?.hasError('pattern')) {
+          <mat-error>Please enter a valid name</mat-error>
+        }
+      </mat-form-field>
+    }
+
+    <mat-form-field appearance="outline" class="overflow-hidden py-2">
+      <mat-label>Enter your email</mat-label>
+      <input matInput placeholder="pat@example.com" formControlName="email" />
+      <mat-hint></mat-hint>
+      @if (email?.touched && email?.hasError('required')) {
+        <mat-error>Email is <strong>required</strong></mat-error>
+      } @else if (email?.hasError('pattern')) {
+        <mat-error>Please enter a valid email address</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="overflow-hidden py-2">
+      <mat-label>Enter your password</mat-label>
+      <input matInput [type]="hidePass() ? 'password' : 'text'" formControlName="password" />
+      <button
+        type="button"
+        matIconButton
+        matSuffix
+        (click)="toggleHidePass()"
+        [attr.aria-label]="'Hide password'"
+        [attr.aria-pressed]="hidePass()"
+      >
+        <mat-icon>{{ hidePass() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+
+      <mat-hint></mat-hint>
+      @if (password?.touched && password?.hasError('required')) {
+        <mat-error>Password is <strong>required</strong></mat-error>
+      } @else if (password?.touched && password?.hasError('minlength')) {
+        <mat-error>Please enter a valid password</mat-error>
+      }
+    </mat-form-field>
+
+    @if (status() === 'register') {
+      <mat-form-field appearance="outline" class="overflow-hidden py-2">
+        <mat-label>confirm your password</mat-label>
+        <input
+          matInput
+          [type]="hideConfirmPass() ? 'password' : 'text'"
+          formControlName="confirmPassword"
+        />
+        <button
+          type="button"
+          matIconButton
+          matSuffix
+          (click)="toggleHideConfirmPass()"
+          [attr.aria-label]="'Hide password'"
+          [attr.aria-pressed]="hideConfirmPass()"
+        >
+          <mat-icon>{{ hideConfirmPass() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+
+        <mat-hint></mat-hint>
+        @if (confirmPassword?.touched && confirmPassword?.hasError('required')) {
+          <mat-error>confirm password is <strong>required</strong></mat-error>
+        } @else if (confirmPassword?.touched && confirmPassword?.hasError('minlength')) {
+          <mat-error>Please enter a valid password</mat-error>
+        }
+      </mat-form-field>
+    }
+    @if (checkFormEquality() && loginForm.hasError('passwordMismatch')) {
+      <mat-error>Password and Confirm password must be equal</mat-error>
+    }
+
+    <button matButton="filled" class="rounded-none!" [disabled]="loginForm.invalid">
+      {{ status() }}
+    </button>
+    <a class="cursor-pointer text-center text-indigo-400" (click)="toggleSatatus()"
+      >{{ toggleStatusText() }}
+    </a>
+  </form>
+</div>
