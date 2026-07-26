@@ -1,17 +1,33 @@
 <!-- NavbarComponent.html -->
-<mat-toolbar class="bg-sky-600! justify-between h-[60px]!">
-  <ul class="flex gap-2">
-    @for (link of navLinks; track link) {
-      <li>
-        <a
-          mat-button
-          class="bg-sky-800 text-white! font-bold!"
-          [routerLink]="['/', link.toLowerCase()]"
-          >{{ link }}</a
-        >
-      </li>
-    }
-  </ul>
+
+<nav mat-tab-nav-bar [tabPanel]="tabPanel" class="bg-indigo-300! flex! px-2">
+  <div>
+    <ul class="hidden sm:flex gap-2">
+      @for (link of navLinks(); track link) {
+        <li>
+          <a
+            mat-tab-link
+            (click)="activeLink.set(link)"
+            [active]="activeLink() == link"
+            class="bg-indigo-300 text-white! font-semibold! tracking-[1px]!"
+            [routerLink]="['/', link.toLowerCase()]"
+          >
+            {{ link }}
+          </a>
+        </li>
+      }
+    </ul>
+    <div class="sm:hidden">
+      <button matButton [matMenuTriggerFor]="menuLinks"><mat-icon>menu</mat-icon></button>
+      <mat-menu #menuLinks="matMenu">
+        @for (link of navLinks(); track link) {
+          <a mat-menu-item [routerLink]="['/', link.toLowerCase()]">
+            {{ link }}
+          </a>
+        }
+      </mat-menu>
+    </div>
+  </div>
 
   <div class="flex gap-2 items-center">
     <mat-form-field appearance="outline" class="no-subscript w-[250px]">
@@ -21,4 +37,5 @@
 
     <button mat-flat-button class="bg-sky-300! text-white! h-[40px]!">Search</button>
   </div>
-</mat-toolbar>
+</nav>
+<mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>

@@ -5,34 +5,31 @@ import { MatCardModule } from '@angular/material/card';
 import { MovieService } from '../../services/movie-service';
 import { FavoriteService } from '../../services/favorite-service';
 import { MovieIntegrationService } from '../../services/movie-integration-service';
+import { ActivatedRoute, Route } from '@angular/router';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-movie-card-component',
-  imports: [MatCardModule, MatButtonModule],
+  imports: [MatCardModule, MatButtonModule, NgClass],
   templateUrl: './movie-card-component.html',
   styleUrl: './movie-card-component.css',
 })
 export class MovieCardComponent {
   avatar = 'avatar.jpg';
   movieInput = input.required<OmdbMovieSearch | FavoriteMovie>();
-
-  // isFavorite = computed<'Favorite' | 'UnFavorite'>(() => {
-  //   const imdbIDIsExists: boolean = this.movieService.favImdbIDList().has(this.movieInput().imdbID);
-  //   // console.log('kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk');
-  //   return imdbIDIsExists ? 'UnFavorite' : 'Favorite';
-  // });
-
   movie = signal<OmdbMovieSearch | FavoriteMovie>({} as OmdbMovieSearch);
-
-  allowed = computed<boolean>(() => {
-    const movie = this.movie();
-    return 'docId' in movie;
-  });
+  parentPath = signal<string>('');
+  isDisabled = computed<boolean>(
+    () =>
+      (this.movie().isFavorite && this.parentPath() === 'home') ||
+      (!this.movie().isFavorite && this.parentPath() === 'favorite'),
+  );
 
   constructor(
     private movieService: MovieService,
     private favoriteService: FavoriteService,
     private movieIntegrationService: MovieIntegrationService,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnChanges() {
@@ -44,7 +41,9 @@ export class MovieCardComponent {
       };
     });
   }
-
+  ngOnInit() {
+    this.parentPath.set(this.route.snapshot.url[0].path);
+  }
   onImageError(event: Event) {
     const img = event.target as HTMLImageElement;
     if (img.src !== this.avatar) {
@@ -54,17 +53,14 @@ export class MovieCardComponent {
 
   toggleFavorite() {
     this.movie.update((data) => ({ ...data, isFavorite: !data.isFavorite }));
-
     if (this.movie().isFavorite) {
       this.favoriteService.addFavorite(this.movie()).subscribe();
       this.movieIntegrationService.newFavMovieSub$.next(this.movie().imdbID);
     } else {
-      if (this.allowed()) {
-        const movie = this.movie();
-        if ('docId' in movie) {
-          this.movieIntegrationService.newFavMovieSub$.next(this.movie().imdbID);
-          this.favoriteService.removeFavorite(movie.docId).subscribe();
-        }
+      const movie = this.movie();
+      if ('docId' in movie) {
+        this.movieIntegrationService.newFavMovieSub$.next(this.movie().imdbID);
+        this.favoriteService.removeFavorite(movie.docId).subscribe();
       }
     }
   }

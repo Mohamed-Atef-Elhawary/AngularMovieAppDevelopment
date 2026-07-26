@@ -4,3 +4,9 @@
 @theme {
   --color-error-color: #ba1a1a;
 }
+/* .mat-mdc-tab-links {
+  display: flex !important;
+  justify-content: space-between !important;
+  background-color: red !important;
+  padding: 5px 0;
+} */

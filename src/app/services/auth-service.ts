@@ -23,6 +23,7 @@ export class AuthService {
     this.uid.set(userId);
     localStorage.setItem('uid', userId);
   }
+
   clearLocalStorage() {
     localStorage.removeItem('favImdbIDList');
   }

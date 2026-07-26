@@ -23,6 +23,7 @@
       matButton
       class="rounded-none! w-full! border! text-indego-700!"
       (click)="toggleFavorite()"
+      [disabled]="isDisabled()"
     >
       {{ movie().isFavorite ? 'UnFivorite' : 'Fivorite' }}
     </button>
