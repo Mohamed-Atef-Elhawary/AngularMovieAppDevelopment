@@ -1,5 +1,5 @@
 // NavbarComponent.ts
-import { Component, linkedSignal, signal, ViewEncapsulation } from '@angular/core';
+import { Component, computed, linkedSignal, signal, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -12,6 +12,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatMenuModule } from '@angular/material/menu';
 
 import { RouterLink } from '@angular/router';
+import { SearchService } from '../../services/search-service';
 
 @Component({
   selector: 'app-navbar-component',
@@ -39,8 +40,12 @@ import { RouterLink } from '@angular/router';
   // encapsulation: ViewEncapsulation.None,
 })
 export class NavbarComponent {
-  // navLinks: string[] = ['Home', 'Favorite', 'Login'];
   navLinks = signal(['Home', 'Favorite', 'Login']);
-  searchString: string = '';
   activeLink = linkedSignal(() => this.navLinks()[0]);
+
+  constructor(private searchService: SearchService) {}
+  onInput(event: Event) {
+    let input = event.target as HTMLInputElement;
+    this.searchService.inputValue.set(input.value);
+  }
 }

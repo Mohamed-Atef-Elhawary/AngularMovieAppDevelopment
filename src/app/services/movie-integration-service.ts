@@ -1,8 +1,9 @@
 import { Injectable, signal } from '@angular/core';
-import { BehaviorSubject, Subject, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subject, switchMap, tap } from 'rxjs';
 import { FavoriteMovie, OmdbMovieResponse, OmdbMovieSearch } from '../interfaces/omdb-movie';
 import { MovieService } from './movie-service';
 import { FavoriteService } from './favorite-service';
+import { SearchService } from './search-service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +18,7 @@ export class MovieIntegrationService {
   constructor(
     private movieService: MovieService,
     private favoriteService: FavoriteService,
+    private searchService: SearchService,
   ) {
     this.getMovies();
   }
@@ -38,21 +40,68 @@ export class MovieIntegrationService {
     this.applyIsFavorit();
   });
 
+  // getMovies() {
+  //   this.pageNumbersub$
+  //     .pipe(
+  //       switchMap((pageNumber: number) => {
+  //         return this.movieService.getMovies(pageNumber, 'Hero');
+  //       }),
+  //     )
+  //     .subscribe({
+  //       next: (response: OmdbMovieResponse) => {
+  //         this.totalResults.set(Number(response.totalResults));
+  //         this.movieList.set(response.Search);
+  //         this.getFavoriteMoviesImdbIds();
+  //         this.applyIsFavorit();
+  //       },
+  //       error: (err) => {
+  //         console.log('from here');
+  //       },
+  //     });
+  // }
   getMovies() {
-    this.pageNumbersub$.subscribe((pageNumber: number) => {
-      this.movieService.getMovies(1).subscribe(console.log);
-      this.movieService.getMovies(pageNumber).subscribe({
+    combineLatest([this.pageNumbersub$, this.searchService.searchValue$])
+      .pipe(
+        switchMap(([pageNumber, searchValue]) => {
+          return this.movieService.getMovies(pageNumber, searchValue);
+        }),
+      )
+      .subscribe({
         next: (response: OmdbMovieResponse) => {
-          this.totalResults.set(Number(response.totalResults));
-          this.movieList.set(response.Search);
-          this.getFavoriteMoviesImdbIds();
-          this.applyIsFavorit();
+          if (response.Response === 'True') {
+            console.log(response.Response, typeof response.Response);
+            this.totalResults.set(Number(response.totalResults));
+            this.movieList.set(response.Search);
+            this.getFavoriteMoviesImdbIds();
+            this.applyIsFavorit();
+          } else {
+            console.log(response.Error);
+          }
         },
         error: (err) => {
+          console.log('errrrrrrrrrr');
+
           console.log('from here');
         },
       });
-    });
+
+    //   this.pageNumbersub$
+    //     .pipe(
+    //       switchMap((pageNumber: number) => {
+    //         return this.movieService.getMovies(pageNumber, 'Hero');
+    //       }),
+    //     )
+    //     .subscribe({
+    //       next: (response: OmdbMovieResponse) => {
+    //         this.totalResults.set(Number(response.totalResults));
+    //         this.movieList.set(response.Search);
+    //         this.getFavoriteMoviesImdbIds();
+    //         this.applyIsFavorit();
+    //       },
+    //       error: (err) => {
+    //         console.log('from here');
+    //       },
+    //     });
   }
 
   getFavoriteMoviesImdbIds() {

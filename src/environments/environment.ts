@@ -1,6 +1,7 @@
 export const environment = {
-  OMDbAPI: 'ace370de',
-  APIURL: 'https://www.omdbapi.com/?s=Inception&apikey=ace370de',
+  apikey: 'ace370de',
+  s: 'Action',
+  APIURL: 'https://www.omdbapi.com',
 
   firebaseConfig: {
     apiKey: 'AIzaSyBgXPebX-0HzCGKJuqQk72JN2POcwprHmM',
