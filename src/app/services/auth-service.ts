@@ -8,6 +8,7 @@ import {
   Auth,
   updateProfile,
 } from 'firebase/auth';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,7 @@ import {
 export class AuthService {
   private auth: Auth = getAuth();
   uid = signal<string | null>(this.getUserId());
-
+  constructor(private router: Router) {}
   getUserId(): string | null {
     return localStorage.getItem('uid');
   }
@@ -24,9 +25,9 @@ export class AuthService {
     localStorage.setItem('uid', userId);
   }
 
-  clearLocalStorage() {
-    localStorage.removeItem('favImdbIDList');
-  }
+  // clearLocalStorage() {
+  //   localStorage.removeItem('favImdbIDList');
+  // }
   register(registerData: {
     email: string;
     password: string;
@@ -46,6 +47,14 @@ export class AuthService {
 
   login(loginData: { email: string; password: string }): Observable<UserCredential> {
     let { email, password } = loginData;
+
     return from(signInWithEmailAndPassword(this.auth, email, password));
+  }
+
+  logout() {
+    localStorage.removeItem('index');
+    localStorage.removeItem('uid');
+    this.router.navigate(['/login']);
+    this.uid.set(null);
   }
 }

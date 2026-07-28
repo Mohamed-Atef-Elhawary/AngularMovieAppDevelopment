@@ -123,7 +123,6 @@ export class LoginComponent implements OnInit {
     }
   }
   login() {
-    console.log('login callllllllllllllled');
     if (this.loginForm.valid) {
       this.authService.login(this.loginForm.value).subscribe({
         next: (response) => {
@@ -137,13 +136,11 @@ export class LoginComponent implements OnInit {
     }
   }
   register() {
-    console.log('register callllllllllllllled');
-
     if (this.loginForm.valid) {
       this.authService.register(this.loginForm.value).subscribe({
         next: (response) => {
           this.authService.setUserId(response.user.uid);
-          this.authService.clearLocalStorage();
+          // this.authService.clearLocalStorage();
           this.router.navigate(['/home']);
         },
         error: (err) => {

@@ -30,12 +30,19 @@
   </div>
 
   <div class="flex gap-2 items-center">
-    <mat-form-field appearance="outline" class="no-subscript w-[250px]">
-      <mat-label>Search</mat-label>
-      <input type="text" matInput (input)="onInput($event)" />
-    </mat-form-field>
-
-    <button mat-flat-button class="bg-sky-300! text-white! h-[40px]!">Search</button>
+    @if (isLoged()) {
+      <mat-form-field appearance="outline" class="no-subscript w-[250px]">
+        <mat-label>Search</mat-label>
+        <input type="text" matInput (input)="onInput($event)" />
+      </mat-form-field>
+      <button mat-flat-button class="bg-sky-300! text-white! h-[40px]!" (click)="logout()">
+        Logout
+      </button>
+    } @else {
+      <button mat-flat-button class="bg-sky-300! text-white! h-[40px]!" routerLink="/login">
+        LogIn
+      </button>
+    }
   </div>
 </nav>
 <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>

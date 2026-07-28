@@ -7,6 +7,7 @@ export const routes: Routes = [
     path: 'home',
     loadComponent: () =>
       import('./pages/home-component/home-component').then((c) => c.HomeComponent),
+    canActivate: [authGuard],
   },
   {
     path: 'favorite',

@@ -8,6 +8,7 @@ import {
   getDocs,
   CollectionReference,
   DocumentData,
+  DocumentReference,
 } from 'firebase/firestore';
 import { Observable, from, throwError } from 'rxjs';
 import { FavoriteMovie, OmdbMovieSearch } from '../interfaces/omdb-movie';
@@ -48,7 +49,7 @@ export class FavoriteService {
     }
   }
 
-  addFavorite(movie: OmdbMovieSearch): Observable<any> {
+  addFavorite(movie: OmdbMovieSearch): Observable<DocumentReference<DocumentData>> {
     try {
       const path = this.getUserFavoritesPath();
       const favCollection = collection(this.firestore, path);

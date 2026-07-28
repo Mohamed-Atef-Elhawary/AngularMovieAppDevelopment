@@ -12,9 +12,8 @@ import { Observable } from 'rxjs';
 export class MovieService {
   constructor(private http: HttpClient) {}
 
-  // APIURL: 'https://www.omdbapi.com/?s=Action&apikey=ace370de&page=1',
-
-  getMovies(pageNumber: number, searchValue: string): Observable<OmdbMovieResponse> {
+  getMovies(searchValue: string, pageNumber: number): Observable<OmdbMovieResponse> {
+    console.log('from movie service searchValue, pageNumber', searchValue, pageNumber);
     return this.http.get<OmdbMovieResponse>(
       `${environment.APIURL}/?s=${searchValue}&apiKey=${environment.apikey}&page=${pageNumber}`,
     );

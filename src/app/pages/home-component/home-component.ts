@@ -20,7 +20,6 @@ export class HomeComponent {
   constructor(private movieIntegrationService: MovieIntegrationService) {}
 
   movieList = computed<OmdbMovieSearch[]>(() => {
-    console.log('this.movieIntegrationService.movieList()', this.movieIntegrationService);
     return this.movieIntegrationService.movieList();
   });
 
@@ -29,5 +28,4 @@ export class HomeComponent {
   onPageChange(event: PageEvent) {
     this.movieIntegrationService.pageNumbersub$.next(event.pageIndex + 1);
   }
-  ngOnInit() {}
 }

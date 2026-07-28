@@ -4,6 +4,8 @@ import { FavoriteMovie, OmdbMovieResponse, OmdbMovieSearch } from '../interfaces
 import { MovieService } from './movie-service';
 import { FavoriteService } from './favorite-service';
 import { SearchService } from './search-service';
+import { snakBarConfig } from '../config/snakbar-config';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +21,7 @@ export class MovieIntegrationService {
     private movieService: MovieService,
     private favoriteService: FavoriteService,
     private searchService: SearchService,
+    private snakBar: MatSnackBar,
   ) {
     this.getMovies();
   }
@@ -60,28 +63,28 @@ export class MovieIntegrationService {
   //     });
   // }
   getMovies() {
-    combineLatest([this.pageNumbersub$, this.searchService.searchValue$])
+    combineLatest([this.searchService.searchValue$, this.pageNumbersub$])
       .pipe(
-        switchMap(([pageNumber, searchValue]) => {
-          return this.movieService.getMovies(pageNumber, searchValue);
+        switchMap(([searchValue, pageNumber]) => {
+          return this.movieService.getMovies(searchValue, pageNumber);
         }),
       )
       .subscribe({
         next: (response: OmdbMovieResponse) => {
+          console.log('response', response);
           if (response.Response === 'True') {
             console.log(response.Response, typeof response.Response);
             this.totalResults.set(Number(response.totalResults));
             this.movieList.set(response.Search);
             this.getFavoriteMoviesImdbIds();
-            this.applyIsFavorit();
           } else {
-            console.log(response.Error);
+            console.log('from intergration servicexxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+            this.snakBar.open('Please try again later', 'Close', snakBarConfig);
           }
         },
         error: (err) => {
-          console.log('errrrrrrrrrr');
-
-          console.log('from here');
+          console.log('from intergration serviceerrrrrrrrrrrrrrrrrrxxxxxxxxx');
+          this.snakBar.open('Please try again later', 'Close', snakBarConfig);
         },
       });
 
@@ -111,7 +114,8 @@ export class MovieIntegrationService {
         response.forEach((res) => {
           tempIds.push(res.imdbID);
         });
-        this.favImdbIDList.set(new Set(...tempIds));
+        this.favImdbIDList.set(new Set(tempIds));
+        this.applyIsFavorit();
       },
     });
   }

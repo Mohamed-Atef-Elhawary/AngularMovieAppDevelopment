@@ -7,6 +7,8 @@ import { FavoriteService } from '../../services/favorite-service';
 import { MovieIntegrationService } from '../../services/movie-integration-service';
 import { ActivatedRoute, Route } from '@angular/router';
 import { NgClass } from '@angular/common';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snakBarConfig } from '../../config/snakbar-config';
 
 @Component({
   selector: 'app-movie-card-component',
@@ -30,6 +32,7 @@ export class MovieCardComponent {
     private favoriteService: FavoriteService,
     private movieIntegrationService: MovieIntegrationService,
     private route: ActivatedRoute,
+    private snakBar: MatSnackBar,
   ) {}
 
   ngOnChanges() {
@@ -54,13 +57,28 @@ export class MovieCardComponent {
   toggleFavorite() {
     this.movie.update((data) => ({ ...data, isFavorite: !data.isFavorite }));
     if (this.movie().isFavorite) {
-      this.favoriteService.addFavorite(this.movie()).subscribe();
+      this.favoriteService.addFavorite(this.movie()).subscribe({
+        next: (res) => {
+          this.snakBar.open('Added to favorite successfully', 'Close', snakBarConfig);
+        },
+        error: (err) => {
+          this.snakBar.open('Please try again later', 'Close', snakBarConfig);
+        },
+      });
       this.movieIntegrationService.newFavMovieSub$.next(this.movie().imdbID);
     } else {
       const movie = this.movie();
       if ('docId' in movie) {
         this.movieIntegrationService.newFavMovieSub$.next(this.movie().imdbID);
-        this.favoriteService.removeFavorite(movie.docId).subscribe();
+
+        this.favoriteService.removeFavorite(movie.docId).subscribe({
+          next: (res) => {
+            this.snakBar.open('Remover from favorite successfully', 'Close', snakBarConfig);
+          },
+          error: (err) => {
+            this.snakBar.open('Please try again later', 'Close', snakBarConfig);
+          },
+        });
       }
     }
   }
