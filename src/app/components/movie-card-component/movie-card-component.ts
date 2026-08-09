@@ -5,14 +5,13 @@ import { MatCardModule } from '@angular/material/card';
 import { MovieService } from '../../services/movie-service';
 import { FavoriteService } from '../../services/favorite-service';
 import { MovieIntegrationService } from '../../services/movie-integration-service';
-import { ActivatedRoute, Route } from '@angular/router';
-import { NgClass } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { snakBarConfig } from '../../config/snakbar-config';
 
 @Component({
   selector: 'app-movie-card-component',
-  imports: [MatCardModule, MatButtonModule, NgClass],
+  imports: [MatCardModule, MatButtonModule],
   templateUrl: './movie-card-component.html',
   styleUrl: './movie-card-component.css',
 })

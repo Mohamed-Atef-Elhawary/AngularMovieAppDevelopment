@@ -13,7 +13,6 @@ export class MovieService {
   constructor(private http: HttpClient) {}
 
   getMovies(searchValue: string, pageNumber: number): Observable<OmdbMovieResponse> {
-    console.log('from movie service searchValue, pageNumber', searchValue, pageNumber);
     return this.http.get<OmdbMovieResponse>(
       `${environment.APIURL}/?s=${searchValue}&apiKey=${environment.apikey}&page=${pageNumber}`,
     );
