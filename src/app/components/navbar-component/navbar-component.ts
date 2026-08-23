@@ -76,7 +76,7 @@ export class NavbarComponent {
   }
   onInput(event: Event) {
     let input = event.target as HTMLInputElement;
-    this.searchService.inputValue.set(input.value);
+    this.searchService.searchValue$.next(input.value);
   }
   logout() {
     this.authService.logout();

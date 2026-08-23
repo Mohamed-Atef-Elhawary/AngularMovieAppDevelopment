@@ -1,5 +1,14 @@
 import { Injectable, signal } from '@angular/core';
-import { BehaviorSubject, catchError, combineLatest, of, Subject, switchMap, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  combineLatest,
+  forkJoin,
+  of,
+  Subject,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { FavoriteMovie, OmdbMovieResponse, OmdbMovieSearch } from '../interfaces/omdb-movie';
 import { MovieService } from './movie-service';
 import { FavoriteService } from './favorite-service';
@@ -14,7 +23,8 @@ export class MovieIntegrationService {
   pageNumbersub$ = new BehaviorSubject<number>(1);
   newFavMovieSub$ = new Subject<string>();
   totalResults = signal<number>(0);
-  movieList = signal<OmdbMovieSearch[]>([]);
+  // movieList = signal<OmdbMovieSearch[]>([]);
+  movieList = new BehaviorSubject<OmdbMovieSearch[]>([]);
   favImdbIDList = signal<Set<string>>(new Set());
 
   constructor(
@@ -43,38 +53,28 @@ export class MovieIntegrationService {
     this.applyIsFavorit();
   });
 
-  // getMovies() {
-  //   this.pageNumbersub$
-  //     .pipe(
-  //       switchMap((pageNumber: number) => {
-  //         return this.movieService.getMovies(pageNumber, 'Hero');
-  //       }),
-  //     )
-  //     .subscribe({
-  //       next: (response: OmdbMovieResponse) => {
-  //         this.totalResults.set(Number(response.totalResults));
-  //         this.movieList.set(response.Search);
-  //         this.getFavoriteMoviesImdbIds();
-  //         this.applyIsFavorit();
-  //       },
-  //       error: (err) => {
-  //         console.log('from here');
-  //       },
-  //     });
-  // }
   getMovies() {
-    combineLatest([this.searchService.searchValue$, this.pageNumbersub$])
+    this.pageNumbersub$
       .pipe(
-        switchMap(([searchValue, pageNumber]) => {
-          return combineLatest([
-            this.movieService.getMovies(searchValue, pageNumber),
+        switchMap((pageNumber) => {
+          return forkJoin([
+            this.movieService.getMovies(pageNumber).pipe(
+              catchError(() =>
+                of({
+                  Response: 'False',
+                  Search: [],
+                  totalResults: '0',
+                  Error: 'Failed to fetch movies',
+                } as OmdbMovieResponse),
+              ),
+            ),
             this.favoriteService.getFavorites().pipe(catchError(() => of([] as FavoriteMovie[]))),
           ]);
         }),
       )
       .subscribe({
         next: ([response, favorites]: [OmdbMovieResponse, FavoriteMovie[]]) => {
-          if (response.Response === 'True') {
+          if (response.Response === 'True' && response.Search) {
             const favIds = new Set(favorites.map((f) => f.imdbID));
             this.favImdbIDList.set(favIds);
 
@@ -84,9 +84,10 @@ export class MovieIntegrationService {
             }));
 
             this.totalResults.set(Number(response.totalResults));
-            this.movieList.set(updatedMovies);
+            // this.movieList.set(updatedMovies);
+            this.movieList.next(updatedMovies);
           } else {
-            this.movieList.set([]);
+            this.movieList.next([]);
             this.totalResults.set(0);
           }
         },
@@ -113,13 +114,14 @@ export class MovieIntegrationService {
   }
 
   applyIsFavorit() {
-    this.movieList.update((movies: OmdbMovieSearch[]) => {
-      return movies.map((movie) => {
-        if (this.favImdbIDList().has(movie.imdbID)) {
-          return { ...movie, isFavorite: true };
-        }
-        return { ...movie, isFavorite: false };
-      });
+    const movies = this.movieList.value;
+    const updatedMovies = movies.map((movie) => {
+      if (this.favImdbIDList().has(movie.imdbID)) {
+        return { ...movie, isFavorite: true };
+      }
+      return { ...movie, isFavorite: false };
     });
+
+    this.movieList.next(updatedMovies);
   }
 }

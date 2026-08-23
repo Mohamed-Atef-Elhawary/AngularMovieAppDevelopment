@@ -7,6 +7,7 @@ import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/materi
 import { MyCustomPaginatorIntl } from '../../services/my-custom-paginator-init';
 import { MovieIntegrationService } from '../../services/movie-integration-service';
 import { SearchService } from '../../services/search-service';
+import { debounce, debounceTime, distinct, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-home-component',
@@ -17,11 +18,32 @@ import { SearchService } from '../../services/search-service';
   styleUrl: './home-component.css',
 })
 export class HomeComponent {
-  constructor(private movieIntegrationService: MovieIntegrationService) {}
-
-  movieList = computed<OmdbMovieSearch[]>(() => {
-    return this.movieIntegrationService.movieList();
-  });
+  storedMovieList = signal<OmdbMovieSearch[]>([]);
+  movieList = signal<OmdbMovieSearch[]>([]);
+  constructor(
+    private movieIntegrationService: MovieIntegrationService,
+    private searchService: SearchService,
+  ) {}
+  ngOnInit() {
+    this.movieIntegrationService.movieList.subscribe((movies) => {
+      this.storedMovieList.set(movies);
+      this.movieList.set(movies);
+    });
+    this.searchService.searchValue$
+      .pipe(debounceTime(1000), distinctUntilChanged())
+      .subscribe((searchTitle: string) => {
+        if (searchTitle) {
+          this.movieList.update(() => {
+            return this.storedMovieList().filter((movie) => {
+              let title = movie.Title.toLowerCase();
+              return title.includes(searchTitle.toLowerCase());
+            });
+          });
+        } else {
+          this.movieList.set(this.storedMovieList());
+        }
+      });
+  }
 
   totalResults = computed<number>(() => this.movieIntegrationService.totalResults());
 
