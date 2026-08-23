@@ -1,59 +1,93 @@
-# AngularMovieAppDevelopment
+# 🎬 Movie App
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.4.
+A responsive movie browsing web application built with **Angular**, **Angular Material**, and **Tailwind CSS**, with **Firebase** powering authentication and data storage. Users can browse a curated list of movies, search by title, and save their favorite titles to a personal watchlist.
 
-## Development server
+**🔗 Live Demo:** [angular-movie-app-development-ten.vercel.app](https://angular-movie-app-development-ten.vercel.app/)
 
-To start a local development server, run:
+---
+
+## ✨ Features
+
+- 🔐 **User Authentication** — Secure login/logout flow powered by Firebase Auth.
+- 🏠 **Home Page** — Browse a grid of movies displaying poster, title, release year, and type.
+- 🔍 **Search** — Quickly find movies by title using the search bar in the navbar.
+- ⭐ **Favorites System** — Add or remove movies from your favorites list with a single click (Favorite / UnFavorite toggle).
+- 📌 **Favorites Page** — View all movies you've marked as favorite in one dedicated tab.
+- 📱 **Responsive Design** — Clean, adaptive UI built with Tailwind CSS and Angular Material components.
+- ☁️ **Cloud Data Persistence** — Favorites are stored and synced via Firebase (Firestore).
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technology |
+|---|---|
+| Framework | [Angular](https://angular.io/) |
+| UI Components | [Angular Material](https://material.angular.io/) |
+| Styling | [Tailwind CSS](https://tailwindcss.com/) |
+| Backend / Auth / DB | [Firebase](https://firebase.google.com/) (Authentication & Firestore) |
+| Deployment | [Vercel](https://vercel.com/) |
+
+---
+
+## 📸 Screenshots
+
+### Home Page
+Browse all movies, search, and toggle favorites directly from the movie grid.
+
+### Favorite Page
+A dedicated view listing only the movies you've favorited.
+
+> Screenshots available in the `/screenshots` folder (add images here when available).
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- [Node.js](https://nodejs.org/) (v18+ recommended)
+- [Angular CLI](https://angular.io/cli)
+- A Firebase project (with Authentication and Firestore enabled)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/<your-username>/movie-app.git
+cd movie-app
+
+# Install dependencies
+npm install
+```
+
+### Environment Setup
+
+Create your Firebase configuration in `src/environments/environment.ts`:
+
+```ts
+export const environment = {
+  production: false,
+  firebaseConfig: {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  }
+};
+```
+
+### Run Locally
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Then navigate to `http://localhost:4200/`.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Build for Production
 
 ```bash
-ng generate component component-name
+ng build --configuration production
 ```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
