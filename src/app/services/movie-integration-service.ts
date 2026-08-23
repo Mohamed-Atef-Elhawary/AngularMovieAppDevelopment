@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subject, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, of, Subject, switchMap, tap } from 'rxjs';
 import { FavoriteMovie, OmdbMovieResponse, OmdbMovieSearch } from '../interfaces/omdb-movie';
 import { MovieService } from './movie-service';
 import { FavoriteService } from './favorite-service';
@@ -66,45 +66,34 @@ export class MovieIntegrationService {
     combineLatest([this.searchService.searchValue$, this.pageNumbersub$])
       .pipe(
         switchMap(([searchValue, pageNumber]) => {
-          return this.movieService.getMovies(searchValue, pageNumber);
+          return combineLatest([
+            this.movieService.getMovies(searchValue, pageNumber),
+            this.favoriteService.getFavorites().pipe(catchError(() => of([] as FavoriteMovie[]))),
+          ]);
         }),
       )
       .subscribe({
-        next: (response: OmdbMovieResponse) => {
-          console.log('response', response);
+        next: ([response, favorites]: [OmdbMovieResponse, FavoriteMovie[]]) => {
           if (response.Response === 'True') {
-            console.log(response.Response, typeof response.Response);
+            const favIds = new Set(favorites.map((f) => f.imdbID));
+            this.favImdbIDList.set(favIds);
+
+            const updatedMovies = response.Search.map((movie) => ({
+              ...movie,
+              isFavorite: favIds.has(movie.imdbID),
+            }));
+
             this.totalResults.set(Number(response.totalResults));
-            this.movieList.set(response.Search);
-            this.getFavoriteMoviesImdbIds();
+            this.movieList.set(updatedMovies);
           } else {
-            console.log('from intergration servicexxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
-            this.snakBar.open('Please try again later', 'Close', snakBarConfig);
+            this.movieList.set([]);
+            this.totalResults.set(0);
           }
         },
-        error: (err) => {
-          console.log('from intergration serviceerrrrrrrrrrrrrrrrrrxxxxxxxxx');
+        error: () => {
           this.snakBar.open('Please try again later', 'Close', snakBarConfig);
         },
       });
-
-    //   this.pageNumbersub$
-    //     .pipe(
-    //       switchMap((pageNumber: number) => {
-    //         return this.movieService.getMovies(pageNumber, 'Hero');
-    //       }),
-    //     )
-    //     .subscribe({
-    //       next: (response: OmdbMovieResponse) => {
-    //         this.totalResults.set(Number(response.totalResults));
-    //         this.movieList.set(response.Search);
-    //         this.getFavoriteMoviesImdbIds();
-    //         this.applyIsFavorit();
-    //       },
-    //       error: (err) => {
-    //         console.log('from here');
-    //       },
-    //     });
   }
 
   getFavoriteMoviesImdbIds() {
@@ -116,6 +105,9 @@ export class MovieIntegrationService {
         });
         this.favImdbIDList.set(new Set(tempIds));
         this.applyIsFavorit();
+      },
+      error: (err) => {
+        console.log('heeeeeeeeeeeeeeeeeeeeeer');
       },
     });
   }

@@ -61,6 +61,7 @@ export class MovieCardComponent {
           this.snakBar.open('Added to favorite successfully', 'Close', snakBarConfig);
         },
         error: (err) => {
+          console.log('err', err);
           this.snakBar.open('Please try again later', 'Close', snakBarConfig);
         },
       });
