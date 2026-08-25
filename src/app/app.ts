@@ -8,6 +8,4 @@ import { NavbarComponent } from './components/navbar-component/navbar-component'
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App {
-  protected readonly title = signal('AngularMovieAppDevelopment');
-}
+export class App {}

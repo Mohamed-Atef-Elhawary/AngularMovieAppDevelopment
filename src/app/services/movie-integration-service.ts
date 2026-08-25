@@ -12,7 +12,6 @@ import {
 import { FavoriteMovie, OmdbMovieResponse, OmdbMovieSearch } from '../interfaces/omdb-movie';
 import { MovieService } from './movie-service';
 import { FavoriteService } from './favorite-service';
-import { SearchService } from './search-service';
 import { snakBarConfig } from '../config/snakbar-config';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -30,7 +29,6 @@ export class MovieIntegrationService {
   constructor(
     private movieService: MovieService,
     private favoriteService: FavoriteService,
-    private searchService: SearchService,
     private snakBar: MatSnackBar,
   ) {
     this.getMovies();

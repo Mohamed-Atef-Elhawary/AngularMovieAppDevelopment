@@ -19,9 +19,9 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatMenuModule } from '@angular/material/menu';
 
 import { ActivatedRoute, NavigationEnd, Route, Router, RouterLink } from '@angular/router';
-import { SearchService } from '../../services/search-service';
 import { filter } from 'rxjs';
 import { AuthService } from '../../services/auth-service';
+import { MovieService } from '../../services/movie-service';
 
 @Component({
   selector: 'app-navbar-component',
@@ -56,10 +56,10 @@ export class NavbarComponent {
   isLoged = computed(() => this.authService.uid());
 
   constructor(
-    private searchService: SearchService,
     private router: Router,
-    private authService: AuthService,
     private cdr: ChangeDetectorRef,
+    private authService: AuthService,
+    private movieService: MovieService,
   ) {}
   ngOnInit() {
     this.router.events
@@ -76,7 +76,7 @@ export class NavbarComponent {
   }
   onInput(event: Event) {
     let input = event.target as HTMLInputElement;
-    this.searchService.searchValue$.next(input.value);
+    this.movieService.searchValue$.next(input.value);
   }
   logout() {
     this.authService.logout();

@@ -5,8 +5,8 @@ import { MovieCardComponent } from '../../components/movie-card-component/movie-
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MyCustomPaginatorIntl } from '../../services/my-custom-paginator-init';
 import { SlicePipe } from '@angular/common';
-import { SearchService } from '../../services/search-service';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { MovieService } from '../../services/movie-service';
 
 @Component({
   selector: 'app-favorite-component',
@@ -23,7 +23,7 @@ export class FavoriteComponent {
   slicleRange = signal<number>(0);
   constructor(
     private favoriteService: FavoriteService,
-    private searchService: SearchService,
+    private movieService: MovieService,
   ) {}
   ngOnInit() {
     this.favoriteService.getFavorites().subscribe((favMoveis: FavoriteMovie[]) => {
@@ -31,7 +31,7 @@ export class FavoriteComponent {
       this.favoriteMovies.set(favMoveis);
     });
 
-    this.searchService.searchValue$
+    this.movieService.searchValue$
       .pipe(debounceTime(1000), distinctUntilChanged())
       .subscribe((searchTitle: string) => {
         if (searchTitle) {

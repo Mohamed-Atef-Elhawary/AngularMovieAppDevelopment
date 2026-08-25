@@ -6,7 +6,6 @@ import { MovieCardComponent } from '../../components/movie-card-component/movie-
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MyCustomPaginatorIntl } from '../../services/my-custom-paginator-init';
 import { MovieIntegrationService } from '../../services/movie-integration-service';
-import { SearchService } from '../../services/search-service';
 import { debounce, debounceTime, distinct, distinctUntilChanged } from 'rxjs';
 
 @Component({
@@ -22,14 +21,14 @@ export class HomeComponent {
   movieList = signal<OmdbMovieSearch[]>([]);
   constructor(
     private movieIntegrationService: MovieIntegrationService,
-    private searchService: SearchService,
+    private movieService: MovieService,
   ) {}
   ngOnInit() {
     this.movieIntegrationService.movieList.subscribe((movies) => {
       this.storedMovieList.set(movies);
       this.movieList.set(movies);
     });
-    this.searchService.searchValue$
+    this.movieService.searchValue$
       .pipe(debounceTime(1000), distinctUntilChanged())
       .subscribe((searchTitle: string) => {
         if (searchTitle) {
