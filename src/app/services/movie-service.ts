@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 
 import { OmdbMovieResponse } from '../interfaces/omdb-movie';
 import { environment } from '../../environments/environment';
-import { Observable, of, Subject, switchMap } from 'rxjs';
+import { catchError, EMPTY, expand, Observable, of, Subject, switchMap, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -15,21 +15,19 @@ export class MovieService {
   constructor(private http: HttpClient) {}
 
   getMovies(pageNumber: number): Observable<OmdbMovieResponse> {
-    return this.http
-      .get<OmdbMovieResponse>(
-        `${environment.APIURL}/?s=${environment.s}&apiKey=${environment.apikey}&page=${pageNumber}`,
-      )
-      .pipe(
-        switchMap((omdResponse: OmdbMovieResponse) => {
-          console.log('hhhhhhhhhhhhhhhhhhhh');
-          if (!omdResponse.Search.length) {
-            return this.http.get<OmdbMovieResponse>(
-              `${environment.APIURL}/?s=${environment.s}&apiKey=${environment.apikey}&page=${pageNumber}`,
-            );
-          } else {
-            return of(omdResponse);
-          }
-        }),
-      );
+    let counter = 0;
+    const buildUrl = (page: number) =>
+      `${environment.APIURL}/?s=${environment.s}&apiKey=${environment.apikey}&page=${page}`;
+
+    return this.http.get<OmdbMovieResponse>(buildUrl(pageNumber)).pipe(
+      expand((omdResponse: OmdbMovieResponse) => {
+        if (omdResponse.Search.length || counter >= 2) {
+          return EMPTY;
+        }
+        counter++;
+        return this.http.get<OmdbMovieResponse>(buildUrl(pageNumber + counter));
+      }),
+      catchError(() => throwError(() => new Error('server error'))),
+    );
   }
 }
