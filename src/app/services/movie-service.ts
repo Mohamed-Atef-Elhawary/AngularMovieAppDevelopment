@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 
 import { OmdbMovieResponse } from '../interfaces/omdb-movie';
 import { environment } from '../../environments/environment';
-import { catchError, EMPTY, expand, Observable, of, Subject, switchMap, throwError } from 'rxjs';
+import { catchError, EMPTY, expand, Observable, Subject, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
