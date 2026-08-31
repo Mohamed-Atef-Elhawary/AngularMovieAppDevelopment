@@ -21,23 +21,20 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class MovieIntegrationService {
   pageNumbersub$ = new BehaviorSubject<number>(1);
   newFavMovieSub$ = new Subject<string>();
-  totalResults = signal<number>(0);
-  // movieList = signal<OmdbMovieSearch[]>([]);
   movieList = new BehaviorSubject<OmdbMovieSearch[]>([]);
+  totalResults = signal<number>(0);
   favImdbIDList = signal<Set<string>>(new Set());
 
   constructor(
     private movieService: MovieService,
     private favoriteService: FavoriteService,
     private snakBar: MatSnackBar,
-  ) {
-    this.getMovies();
-  }
+  ) {}
 
   toggleFavImdbID = this.newFavMovieSub$.subscribe((imdbID) => {
     if (this.favImdbIDList().has(imdbID)) {
       this.favImdbIDList.update((currentSet) => {
-        let newSet = currentSet;
+        let newSet = new Set(currentSet);
         newSet.delete(imdbID);
         return newSet;
       });
@@ -82,7 +79,6 @@ export class MovieIntegrationService {
             }));
 
             this.totalResults.set(Number(response.totalResults));
-            // this.movieList.set(updatedMovies);
             this.movieList.next(updatedMovies);
           } else {
             this.movieList.next([]);
@@ -105,9 +101,7 @@ export class MovieIntegrationService {
         this.favImdbIDList.set(new Set(tempIds));
         this.applyIsFavorit();
       },
-      error: (err) => {
-        console.log('heeeeeeeeeeeeeeeeeeeeeer');
-      },
+      error: (err) => {},
     });
   }
 

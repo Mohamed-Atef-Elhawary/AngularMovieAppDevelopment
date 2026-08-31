@@ -24,6 +24,7 @@ export class HomeComponent {
     private movieService: MovieService,
   ) {}
   ngOnInit() {
+    this.movieIntegrationService.getMovies();
     this.movieIntegrationService.movieList.subscribe((movies) => {
       this.storedMovieList.set(movies);
       this.movieList.set(movies);
