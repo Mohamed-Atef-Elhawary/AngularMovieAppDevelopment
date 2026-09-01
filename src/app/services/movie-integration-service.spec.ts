@@ -4,12 +4,14 @@ import { TestBed } from '@angular/core/testing';
 import { MovieService } from './movie-service';
 import { FavoriteService } from './favorite-service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Observable, of } from 'rxjs';
+import { FavoriteMovie, OmdbMovieResponse, OmdbMovieSearch } from '../interfaces/omdb-movie';
 
 interface MovieServiceInterface {
-  getMovies: Mock;
+  getMovies: Mock<(pageNumber: number) => Observable<OmdbMovieResponse>>;
 }
 interface FavoriteServiceInterface {
-  getFavorites: Mock;
+  getFavorites: Mock<FavoriteService['getFavorites']>;
 }
 interface SnakBarInterface {
   open: Mock;
@@ -17,18 +19,18 @@ interface SnakBarInterface {
 
 describe('MovieIntegrationService', () => {
   let movieIntegrationService: MovieIntegrationService;
-  let movieService: MovieServiceInterface;
-  let favoriteService: FavoriteServiceInterface;
-  let matSnackBar: SnakBarInterface;
+  let mockMovieService: MovieServiceInterface;
+  let mockFavoriteService: FavoriteServiceInterface;
+  let mockMatSnackBar: SnakBarInterface;
   let idList: string[];
   beforeEach(() => {
-    const mockMovieService: MovieServiceInterface = {
+    mockMovieService = {
       getMovies: vi.fn(),
     };
-    const mockFavoriteService: FavoriteServiceInterface = {
+    mockFavoriteService = {
       getFavorites: vi.fn(),
     };
-    const mockMatSnackBar: SnakBarInterface = {
+    mockMatSnackBar = {
       open: vi.fn(),
     };
     idList = ['1', '2', '3', '4', '5'];
@@ -58,10 +60,99 @@ describe('MovieIntegrationService', () => {
       );
     });
   });
-  // describe("getMovies",()=>{
-  //   it("",()=>{})
+  describe('getMovies', () => {
+    describe('when ApI call succeeds', () => {
+      let response: OmdbMovieResponse;
+      let search: OmdbMovieSearch[];
+      let favorites: FavoriteMovie[];
 
-  // })
+      describe('when the response is "true" and Search array not empty', () => {
+        beforeEach(() => {
+          search = [
+            {
+              Poster: 'poster 1',
+              Title: 'title 1',
+              Type: 'type 1',
+              Year: '2001',
+              imdbID: '1',
+              isFavorite: false,
+            },
+            {
+              Poster: 'poster 2',
+              Title: 'title 2',
+              Type: 'type 2',
+              Year: '2002',
+              imdbID: '2',
+              isFavorite: false,
+            },
+            {
+              Poster: 'poster 3',
+              Title: 'title 3',
+              Type: 'type 3',
+              Year: '2003',
+              imdbID: '3',
+              isFavorite: false,
+            },
+
+            {
+              Poster: 'poster 4',
+              Title: 'title 4',
+              Type: 'type 4',
+              Year: '2004',
+              imdbID: '4',
+              isFavorite: false,
+            },
+          ];
+          response = { Response: 'True', totalResults: '4', Search: search, Error: '' };
+          favorites = [
+            {
+              Poster: 'poster 2',
+              Title: 'title 2',
+              Type: 'type 2',
+              Year: '2002',
+              imdbID: '2',
+              isFavorite: false,
+              docId: 'doc 2',
+            },
+            {
+              Poster: 'poster 3',
+              Title: 'title 3',
+              Type: 'type 3',
+              Year: '2003',
+              imdbID: '3',
+              isFavorite: false,
+              docId: 'doc 3',
+            },
+          ];
+          mockMovieService.getMovies.mockReturnValue(of(response));
+          mockFavoriteService.getFavorites.mockReturnValue(of(favorites));
+          movieIntegrationService.getMovies();
+        });
+        it('should set favImdbIDList with the favorite movies id', () => {
+          expect(movieIntegrationService.favImdbIDList()).toEqual(new Set(['2', '3']));
+        });
+        it('should set totalResults with the res.totalResults', () => {
+          expect(movieIntegrationService.totalResults()).toBe(4);
+        });
+        it('should emit movieList with movies including isFavorite state', () => {
+          const listValue: OmdbMovieSearch[] = search.map((movie) => ({
+            ...movie,
+            isFavorite: ['2', '3'].includes(movie.imdbID),
+          }));
+          expect(movieIntegrationService.movieList.value).toEqual(listValue);
+        });
+      });
+      // describe('when the response is "false" or Search array is empty', () => {
+      //   it('should set favImdbIDList with empty set', () => {});
+      //   it('should emit movieList with empty array', () => {});
+      //   it('should set totalResults with zero', () => {});
+      // });
+    });
+
+    // describe('when ApI call fails', () => {
+    //   it('should call snakBar.open with specific message, title, config', () => {});
+    // });
+  });
   // describe("getFavoriteMoviesImdbIds",()=>{})
   // describe("applyIsFavorit",()=>{})
 });

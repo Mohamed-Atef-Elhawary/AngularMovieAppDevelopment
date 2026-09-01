@@ -8,6 +8,7 @@ import {
   Subject,
   switchMap,
   tap,
+  throwError,
 } from 'rxjs';
 import { FavoriteMovie, OmdbMovieResponse, OmdbMovieSearch } from '../interfaces/omdb-movie';
 import { MovieService } from './movie-service';
@@ -53,34 +54,37 @@ export class MovieIntegrationService {
       .pipe(
         switchMap((pageNumber) => {
           return forkJoin([
-            this.movieService.getMovies(pageNumber).pipe(
-              catchError(() =>
-                of({
-                  Response: 'False',
-                  Search: [],
-                  totalResults: '0',
-                  Error: 'Failed to fetch movies',
-                } as OmdbMovieResponse),
+            this.movieService
+              .getMovies(pageNumber)
+              .pipe(
+                catchError(() =>
+                  throwError(() => new Error('server error please try again later')),
+                ),
               ),
-            ),
-            this.favoriteService.getFavorites().pipe(catchError(() => of([] as FavoriteMovie[]))),
+            this.favoriteService
+              .getFavorites()
+              .pipe(
+                catchError(() =>
+                  throwError(() => new Error('server error please try again later')),
+                ),
+              ),
           ]);
         }),
       )
       .subscribe({
-        next: ([response, favorites]: [OmdbMovieResponse, FavoriteMovie[]]) => {
-          if (response.Response === 'True' && response.Search) {
+        next: ([res, favorites]: [OmdbMovieResponse, FavoriteMovie[]]) => {
+          if (res.Response === 'True' && res.Search.length) {
             const favIds = new Set(favorites.map((f) => f.imdbID));
             this.favImdbIDList.set(favIds);
 
-            const updatedMovies = response.Search.map((movie) => ({
+            const updatedMovies = res.Search.map((movie) => ({
               ...movie,
               isFavorite: favIds.has(movie.imdbID),
             }));
-
-            this.totalResults.set(Number(response.totalResults));
+            this.totalResults.set(Number(res.totalResults));
             this.movieList.next(updatedMovies);
           } else {
+            this.favImdbIDList.set(new Set());
             this.movieList.next([]);
             this.totalResults.set(0);
           }
