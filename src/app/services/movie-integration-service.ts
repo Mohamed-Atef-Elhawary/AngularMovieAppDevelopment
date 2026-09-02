@@ -105,7 +105,9 @@ export class MovieIntegrationService {
         this.favImdbIDList.set(new Set(tempIds));
         this.applyIsFavorit();
       },
-      error: (err) => {},
+      error: () => {
+        this.snakBar.open('Please try again later', 'Close', snakBarConfig);
+      },
     });
   }
 
