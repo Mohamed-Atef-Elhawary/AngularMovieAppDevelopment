@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   Firestore,
   collection,
@@ -10,7 +10,7 @@ import {
   DocumentData,
   DocumentReference,
 } from 'firebase/firestore';
-import { Observable, from, throwError } from 'rxjs';
+import { Observable, from, of, throwError } from 'rxjs';
 import { FavoriteMovie, OmdbMovieSearch } from '../interfaces/omdb-movie';
 import { AuthService } from './auth-service';
 
@@ -18,15 +18,10 @@ import { AuthService } from './auth-service';
   providedIn: 'root',
 })
 export class FavoriteService {
-  favCollection!: CollectionReference<DocumentData, DocumentData>;
   constructor(
     private firestore: Firestore,
     private authService: AuthService,
   ) {}
-  ngonInit() {
-    this.favCollection = collection(this.firestore, 'favorites');
-  }
-
   getUserFavoritesPath(): string {
     const currentUid = this.authService.uid();
     if (currentUid) {
@@ -49,7 +44,7 @@ export class FavoriteService {
     }
   }
 
-  addFavorite(movie: OmdbMovieSearch): Observable<DocumentReference<DocumentData>> {
+  addFavorite(movie: OmdbMovieSearch): Observable<DocumentReference<DocumentData, DocumentData>> {
     try {
       const path = this.getUserFavoritesPath();
       const favCollection = collection(this.firestore, path);
@@ -61,8 +56,8 @@ export class FavoriteService {
 
   removeFavorite(docId: string): Observable<void> {
     try {
-      const currentUid = this.authService.uid();
-      const docRef = doc(this.firestore, `users/${currentUid}/favorites/${docId}`);
+      const path = this.getUserFavoritesPath();
+      const docRef = doc(this.firestore, `${path}/${docId}`);
       return from(deleteDoc(docRef));
     } catch (err) {
       return throwError(() => err);
