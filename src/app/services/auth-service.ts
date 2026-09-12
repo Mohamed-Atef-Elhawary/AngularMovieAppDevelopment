@@ -17,17 +17,16 @@ export class AuthService {
   private auth: Auth = getAuth();
   uid = signal<string | null>(this.getUserId());
   constructor(private router: Router) {}
+
   getUserId(): string | null {
     return localStorage.getItem('uid');
   }
+
   setUserId(userId: string): void {
     this.uid.set(userId);
     localStorage.setItem('uid', userId);
   }
 
-  // clearLocalStorage() {
-  //   localStorage.removeItem('favImdbIDList');
-  // }
   register(registerData: {
     email: string;
     password: string;
@@ -47,7 +46,6 @@ export class AuthService {
 
   login(loginData: { email: string; password: string }): Observable<UserCredential> {
     let { email, password } = loginData;
-
     return from(signInWithEmailAndPassword(this.auth, email, password));
   }
 
