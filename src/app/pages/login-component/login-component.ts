@@ -13,6 +13,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../services/auth-service';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snakBarConfig } from '../../config/snakbar-config';
 
 @Component({
   selector: 'app-login-component',
@@ -43,6 +45,7 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
+    private snakBar: MatSnackBar,
   ) {}
   ngOnInit() {
     this.makeForm();
@@ -115,7 +118,6 @@ export class LoginComponent implements OnInit {
   }
 
   submit() {
-    console.log('submit callllllllllllllled');
     if (this.status() == 'login') {
       this.login();
     } else {
@@ -130,7 +132,7 @@ export class LoginComponent implements OnInit {
           this.router.navigate(['/home']);
         },
         error: (err) => {
-          console.log('err', err);
+          this.snakBar.open('Please try again later', 'Close', snakBarConfig);
         },
       });
     }
@@ -140,11 +142,11 @@ export class LoginComponent implements OnInit {
       this.authService.register(this.loginForm.value).subscribe({
         next: (response) => {
           this.authService.setUserId(response.user.uid);
-          // this.authService.clearLocalStorage();
           this.router.navigate(['/home']);
         },
         error: (err) => {
           console.log('err', err);
+          this.snakBar.open('Please try again later', 'Close', snakBarConfig);
         },
       });
     }

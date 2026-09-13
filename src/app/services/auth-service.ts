@@ -35,12 +35,12 @@ export class AuthService {
     const { email, password, fullName } = registerData;
 
     return from(createUserWithEmailAndPassword(this.auth, email, password)).pipe(
-      switchMap((userCredential) =>
-        from(updateProfile(userCredential.user, { displayName: fullName })).pipe(
+      switchMap((userCredential) => {
+        return from(updateProfile(userCredential.user, { displayName: fullName })).pipe(
           switchMap(() => from(userCredential.user.reload())),
           map(() => userCredential),
-        ),
-      ),
+        );
+      }),
     );
   }
 

@@ -40,7 +40,21 @@ describe('AuthService', () => {
       expect(localStorage.getItem('uid')).toBe('user2');
     });
   });
-  // describe(register'', () => {
+
+  describe('register', () => {
+    describe('when API call succeeds', () => {
+      it('should call createUser with correct email and password', () => {});
+      it('should call updateProfile with correct fullName', () => {});
+      it('should call reload once', () => {});
+      it('should create a new user with email, password, fullName', () => {});
+    });
+    describe('when API call fails', () => {
+      it('should emit an error to subscribers', () => {});
+      it('should not call updateProfile if createUser fails', () => {});
+    });
+  });
+
+  // describe('login', () => {
   //   it('', () => {});
   // });
 });
