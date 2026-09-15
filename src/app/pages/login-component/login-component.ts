@@ -145,7 +145,6 @@ export class LoginComponent implements OnInit {
           this.router.navigate(['/home']);
         },
         error: (err) => {
-          console.log('err', err);
           this.snakBar.open('Please try again later', 'Close', snakBarConfig);
         },
       });
