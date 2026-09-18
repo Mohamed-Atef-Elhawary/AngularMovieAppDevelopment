@@ -42,10 +42,10 @@ export class LoginComponent implements OnInit {
   hideConfirmPass = signal(true);
 
   constructor(
-    private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router,
     private snakBar: MatSnackBar,
+    private fb: FormBuilder,
+    private router: Router,
   ) {}
   ngOnInit() {
     this.makeForm();
@@ -95,7 +95,7 @@ export class LoginComponent implements OnInit {
     this.hideConfirmPass.update((v) => !v);
   }
 
-  toggleSatatus() {
+  toggleStatus() {
     this.status.update((state: 'login' | 'register') => {
       return state === 'login' ? 'register' : 'login';
     });
