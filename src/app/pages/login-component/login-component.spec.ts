@@ -4,6 +4,8 @@ import { Mock } from 'vitest';
 import { AuthService } from '../../services/auth-service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { of, throwError } from 'rxjs';
+import { snakBarConfig } from '../../config/snakbar-config';
 interface AuthServiceInterface {
   login: Mock;
   register: Mock;
@@ -20,25 +22,24 @@ interface RouterInterface {
 describe('LoginComponent', () => {
   let loginComponent: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
-
+  const mockAuthService: AuthServiceInterface = {
+    login: vi.fn(),
+    register: vi.fn(),
+    setUserId: vi.fn(),
+  };
+  const mockMatSnackBar: MatSnackBarInterface = {
+    open: vi.fn(),
+  };
+  const mockRouter: RouterInterface = {
+    navigate: vi.fn(),
+  };
   beforeEach(async () => {
-    const spyAuthService: AuthServiceInterface = {
-      login: vi.fn(),
-      register: vi.fn(),
-      setUserId: vi.fn(),
-    };
-    const spyMatSnackBar: MatSnackBarInterface = {
-      open: vi.fn(),
-    };
-    const spyRouter: RouterInterface = {
-      navigate: vi.fn(),
-    };
     await TestBed.configureTestingModule({
       imports: [LoginComponent],
       providers: [
-        { provide: AuthService, useValue: spyAuthService },
-        { provide: MatSnackBar, useValue: spyMatSnackBar },
-        { provide: Router, useValue: spyRouter },
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: MatSnackBar, useValue: mockMatSnackBar },
+        { provide: Router, useValue: mockRouter },
       ],
     }).compileComponents();
 
@@ -47,7 +48,9 @@ describe('LoginComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges();
   });
-
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
   it('should create', () => {
     expect(loginComponent).toBeTruthy();
   });
@@ -167,4 +170,126 @@ describe('LoginComponent', () => {
       });
     });
   });
+
+  describe('toggleHidePass', () => {
+    it('should toggle hidePass value', () => {
+      loginComponent.hidePass.set(true);
+      loginComponent.toggleHidePass();
+      expect(loginComponent.hidePass()).toBe(false);
+    });
+  });
+  describe('toggleHideConfirmPass', () => {
+    it('should toggle hideConfirmPass value', () => {
+      loginComponent.hideConfirmPass.set(true);
+      loginComponent.toggleHideConfirmPass();
+      expect(loginComponent.hideConfirmPass()).toBe(false);
+    });
+  });
+  describe('toggleStatus', () => {
+    it('should toggle status value to register', () => {
+      loginComponent.status.set('login');
+      loginComponent.toggleStatus();
+      expect(loginComponent.status()).toBe('register');
+    });
+    it('should toggle status value to login', () => {
+      loginComponent.status.set('register');
+      loginComponent.toggleStatus();
+      expect(loginComponent.status()).toBe('login');
+    });
+    describe('when status value is register', () => {
+      let controlKeys: string[] = [];
+      beforeEach(() => {
+        loginComponent.status.set('login');
+        loginComponent.toggleStatus();
+        controlKeys = Object.keys(loginComponent.loginForm.controls);
+      });
+      it('should add fullName control to loginForm', () => {
+        expect(controlKeys).toContain('fullName');
+      });
+      it('should add confirmPassword control to loginForm', () => {
+        expect(controlKeys).toContain('confirmPassword');
+      });
+    });
+    describe('when status value is login', () => {
+      let controlKeys: string[] = [];
+      beforeEach(() => {
+        loginComponent.status.set('register');
+        loginComponent.toggleStatus();
+        controlKeys = Object.keys(loginComponent.loginForm.controls);
+      });
+      it('should remove fullName control from loginForm', () => {
+        expect(controlKeys).not.toContain('fullName');
+      });
+      it('should remove confirmPassword control from loginForm', () => {
+        expect(controlKeys).not.toContain('confirmPassword');
+      });
+    });
+  });
+  describe('submit', () => {
+    beforeEach(() => {
+      vi.spyOn(loginComponent, 'login').mockImplementation(() => {});
+      vi.spyOn(loginComponent, 'register').mockImplementation(() => {});
+    });
+    describe('when status is login', () => {
+      it('should execute login function', () => {
+        loginComponent.status.set('login');
+        loginComponent.submit();
+        expect(loginComponent.login).toHaveBeenCalledOnce();
+        expect(loginComponent.register).not.toHaveBeenCalled();
+      });
+    });
+    describe('when status is register', () => {
+      it('should execute register function', () => {
+        loginComponent.status.set('register');
+        loginComponent.submit();
+        expect(loginComponent.register).toHaveBeenCalledOnce();
+        expect(loginComponent.login).not.toHaveBeenCalled();
+      });
+    });
+  });
+  describe('login', () => {
+    describe('when loginForm.valid', () => {
+      beforeEach(() => {
+        loginComponent.email?.setValue('e@e.com');
+        loginComponent.password?.setValue('123456');
+      });
+      describe('when API call succeeds', () => {
+        beforeEach(() => {
+          mockAuthService.login.mockReturnValue(of({ user: { uid: '123' } }));
+          loginComponent.login();
+        });
+        it('should call authService.login once', () => {
+          expect(mockAuthService.login).toHaveBeenCalledOnce();
+        });
+        it('should call authService.login with loginForm.value', () => {
+          const loginData = loginComponent.loginForm.value;
+          expect(mockAuthService.login).toHaveBeenCalledWith(loginData);
+        });
+        it('should call authService.setUserId with "uid"', () => {
+          expect(mockAuthService.setUserId).toHaveBeenCalledWith('123');
+        });
+        it('should navigate to home', () => {
+          expect(mockRouter.navigate).toHaveBeenCalledWith(['/home']);
+        });
+      });
+      describe('when API call fails', () => {
+        it('should display snakBar.open with expected message', () => {
+          mockAuthService.login.mockReturnValue(throwError(() => new Error('server error')));
+          loginComponent.login();
+          expect(mockMatSnackBar.open).toHaveBeenCalledWith(
+            'Please try again later',
+            'Close',
+            snakBarConfig,
+          );
+        });
+      });
+    });
+    describe('when loginForm.invalid', () => {
+      it('should not call authService.login', () => {
+        loginComponent.login();
+        expect(mockAuthService.login).not.toHaveBeenCalled();
+      });
+    });
+  });
+  // describe('register', () => {});
 });
