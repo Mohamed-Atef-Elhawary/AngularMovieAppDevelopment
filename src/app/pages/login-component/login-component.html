@@ -4,8 +4,8 @@
     (ngSubmit)="submit()"
     class="flex flex-col gap-3 w-[300px] m-auto bg-white border border-gray-100 p-4"
   >
-    <h2 class="font-bold">Login</h2>
-    @if (this.status() === 'register') {
+    <h2 class="font-bold">{{ status()[0].toUpperCase() }}{{ status().slice(1) }}</h2>
+    @if (status() === 'register') {
       <mat-form-field appearance="outline" class="overflow-hidden py-2">
         <mat-label>Enter your name</mat-label>
         <input matInput placeholder="Full Name" formControlName="fullName" />
@@ -78,6 +78,7 @@
         }
       </mat-form-field>
     }
+
     @if (checkFormEquality() && loginForm.hasError('passwordMismatch')) {
       <mat-error>Password and Confirm password must be equal</mat-error>
     }

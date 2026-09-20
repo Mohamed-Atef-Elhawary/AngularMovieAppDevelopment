@@ -35,7 +35,7 @@ describe('LoginComponent', () => {
   };
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LoginComponent],
+      // imports: [LoginComponent],
       providers: [
         { provide: AuthService, useValue: mockAuthService },
         { provide: MatSnackBar, useValue: mockMatSnackBar },
@@ -291,5 +291,51 @@ describe('LoginComponent', () => {
       });
     });
   });
-  // describe('register', () => {});
+  describe('register', () => {
+    describe('when loginForm.valid', () => {
+      beforeEach(() => {
+        loginComponent.fullName?.setValue('first user');
+        loginComponent.email?.setValue('e@e.com');
+        loginComponent.password?.setValue('123456');
+        loginComponent.confirmPassword?.setValue('123456');
+      });
+      describe('when API call succeeds', () => {
+        beforeEach(() => {
+          mockAuthService.register.mockReturnValue(of({ user: { uid: '123' } }));
+          loginComponent.register();
+        });
+        it('should call authService.register once', () => {
+          expect(mockAuthService.register).toHaveBeenCalledOnce();
+        });
+        it('should call authService.register with correct parameters', () => {
+          const formValue = loginComponent.loginForm.value;
+          expect(mockAuthService.register).toHaveBeenCalledWith(formValue);
+        });
+        it('should call authService.setUserId with uid', () => {
+          expect(mockAuthService.setUserId).toHaveBeenCalledWith('123');
+        });
+        it('should navigate to home', () => {
+          expect(mockRouter.navigate).toHaveBeenCalledWith(['/home']);
+        });
+      });
+      describe('when API call fails', () => {
+        it('should call snakBar.open with expected message', () => {
+          mockAuthService.register.mockReturnValue(throwError(() => new Error('server error')));
+          loginComponent.register();
+          expect(mockMatSnackBar.open).toHaveBeenCalledWith(
+            'Please try again later',
+            'Close',
+            snakBarConfig,
+          );
+        });
+      });
+    });
+
+    describe('when loginForm.invalid', () => {
+      it('should not call authService.register', () => {
+        loginComponent.register();
+        expect(mockAuthService.register).not.toHaveBeenCalled();
+      });
+    });
+  });
 });
