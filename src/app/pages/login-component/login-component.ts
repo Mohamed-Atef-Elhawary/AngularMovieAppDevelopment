@@ -15,6 +15,7 @@ import { AuthService } from '../../services/auth-service';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { snakBarConfig } from '../../config/snakbar-config';
+import { JsonPipe } from '@angular/common';
 
 @Component({
   selector: 'app-login-component',

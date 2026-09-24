@@ -24,7 +24,7 @@
       <mat-hint></mat-hint>
       @if (email?.touched && email?.hasError('required')) {
         <mat-error>Email is <strong>required</strong></mat-error>
-      } @else if (email?.hasError('pattern')) {
+      } @else if (email?.touched && email?.hasError('pattern')) {
         <mat-error>Please enter a valid email address</mat-error>
       }
     </mat-form-field>
@@ -46,7 +46,7 @@
       <mat-hint></mat-hint>
       @if (password?.touched && password?.hasError('required')) {
         <mat-error>Password is <strong>required</strong></mat-error>
-      } @else if (password?.touched && password?.hasError('minlength')) {
+      } @else if (password?.touched && password?.hasError('pattern')) {
         <mat-error>Please enter a valid password</mat-error>
       }
     </mat-form-field>
@@ -73,7 +73,7 @@
         <mat-hint></mat-hint>
         @if (confirmPassword?.touched && confirmPassword?.hasError('required')) {
           <mat-error>confirm password is <strong>required</strong></mat-error>
-        } @else if (confirmPassword?.touched && confirmPassword?.hasError('minlength')) {
+        } @else if (confirmPassword?.touched && confirmPassword?.hasError('pattern')) {
           <mat-error>Please enter a valid password</mat-error>
         }
       </mat-form-field>
@@ -86,8 +86,13 @@
     <button matButton="filled" class="rounded-none!" [disabled]="loginForm.invalid">
       {{ status() }}
     </button>
-    <a class="cursor-pointer text-center text-indigo-400" (click)="toggleStatus()"
-      >{{ toggleStatusText() }}
-    </a>
+
+    <button
+      type="button"
+      class="cursor-pointer text-center text-indigo-400"
+      (click)="toggleStatus()"
+    >
+      {{ toggleStatusText() }}
+    </button>
   </form>
 </div>
