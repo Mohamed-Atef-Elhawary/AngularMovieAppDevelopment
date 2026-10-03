@@ -31,16 +31,16 @@
 
     <mat-form-field appearance="outline" class="overflow-hidden py-2">
       <mat-label>Enter your password</mat-label>
-      <input matInput [type]="hidePass() ? 'password' : 'text'" formControlName="password" />
+      <input matInput [type]="isPassHidden() ? 'password' : 'text'" formControlName="password" />
       <button
         type="button"
         matIconButton
         matSuffix
-        (click)="toggleHidePass()"
-        [attr.aria-label]="'Hide password'"
-        [attr.aria-pressed]="hidePass()"
+        (click)="toggleIsPassHidden()"
+        [attr.aria-label]="isPassHidden() ? 'show password' : 'Hide password'"
+        [attr.aria-pressed]="!isPassHidden()"
       >
-        <mat-icon>{{ hidePass() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        <mat-icon>{{ isPassHidden() ? 'visibility_off' : 'visibility' }}</mat-icon>
       </button>
 
       <mat-hint></mat-hint>
@@ -56,18 +56,18 @@
         <mat-label>confirm your password</mat-label>
         <input
           matInput
-          [type]="hideConfirmPass() ? 'password' : 'text'"
+          [type]="isPassConfirmPassHidden() ? 'password' : 'text'"
           formControlName="confirmPassword"
         />
         <button
           type="button"
           matIconButton
           matSuffix
-          (click)="toggleHideConfirmPass()"
+          (click)="toggleIsPassConfirmPassHidden()"
           [attr.aria-label]="'Hide password'"
-          [attr.aria-pressed]="hideConfirmPass()"
+          [attr.aria-pressed]="isPassConfirmPassHidden()"
         >
-          <mat-icon>{{ hideConfirmPass() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          <mat-icon>{{ isPassConfirmPassHidden() ? 'visibility_off' : 'visibility' }}</mat-icon>
         </button>
 
         <mat-hint></mat-hint>

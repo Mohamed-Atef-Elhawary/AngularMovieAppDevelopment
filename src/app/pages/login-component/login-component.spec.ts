@@ -11,7 +11,9 @@ import { By } from '@angular/platform-browser';
 import { HarnessLoader } from '@angular/cdk/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { MatInputHarness } from '@angular/material/input/testing';
-
+import { MatFormFieldHarness } from '@angular/material/form-field/testing';
+import { MatButtonHarness } from '@angular/material/button/testing';
+import { MatIconHarness } from '@angular/material/icon/testing';
 interface AuthServiceInterface {
   login: Mock;
   register: Mock;
@@ -182,16 +184,16 @@ describe('LoginComponent', () => {
 
     describe('toggleHidePass', () => {
       it('should toggle hidePass value', () => {
-        loginComponent.hidePass.set(true);
-        loginComponent.toggleHidePass();
-        expect(loginComponent.hidePass()).toBe(false);
+        loginComponent.isPassHidden.set(true);
+        loginComponent.toggleIsPassHidden();
+        expect(loginComponent.isPassHidden()).toBe(false);
       });
     });
     describe('toggleHideConfirmPass', () => {
       it('should toggle hideConfirmPass value', () => {
-        loginComponent.hideConfirmPass.set(true);
-        loginComponent.toggleHideConfirmPass();
-        expect(loginComponent.hideConfirmPass()).toBe(false);
+        loginComponent.isPassConfirmPassHidden.set(true);
+        loginComponent.toggleIsPassConfirmPassHidden();
+        expect(loginComponent.isPassConfirmPassHidden()).toBe(false);
       });
     });
     describe('toggleStatus', () => {
@@ -422,7 +424,102 @@ describe('LoginComponent', () => {
         });
       });
 
-      // describe('password form field',()=>{})
+      describe('password form field', () => {
+        let passwordFormFieldLoader: HarnessLoader;
+        let passwordFormFieldHarness: MatFormFieldHarness;
+        let inputHarness: MatInputHarness;
+        let toggleButtonHarness: MatButtonHarness;
+        beforeEach(async () => {
+          passwordFormFieldLoader = await loader.getChildLoader(
+            'mat-form-field :has(input[formControlName="password"])',
+          );
+          passwordFormFieldHarness = await loader.getHarness(
+            MatFormFieldHarness.with({
+              selector: ':has(input[formControlName="password"])',
+            }),
+          );
+          inputHarness = await passwordFormFieldLoader.getHarness(MatInputHarness);
+          toggleButtonHarness = await passwordFormFieldLoader.getHarness(MatButtonHarness);
+        });
+        it('should contain a label', async () => {
+          const label = await passwordFormFieldHarness.getLabel();
+          expect(label).toContain('password');
+        });
+        it('should have type password initially', async () => {
+          const matInputType = await inputHarness.getType();
+          expect(matInputType).toBe('password');
+        });
+
+        // describe('toggle button', () => {
+        //   let input: DebugElement;
+        //   let matFormField: HTMLElement;
+        //   let button: HTMLButtonElement | null;
+
+        //   beforeEach(() => {
+        //     input = debugElement.query(By.css('input[formControlName="password"]'));
+        //     matFormField = input.nativeElement.closest('mat-form-field') as HTMLElement;
+        //     button = matFormField.querySelector('button');
+        //   });
+
+        //   it('should contain toggle input type button', async () => {
+        //     expect(button).toBeTruthy();
+        //   });
+
+        //   it('should change input type when clicked', () => {
+        //     button?.dispatchEvent(new Event('click'));
+        //     fixture.detectChanges();
+        //     expect(input.nativeElement.type).toBe('text');
+        //   });
+        // });
+
+        describe('toggle button', () => {
+          it('should contain toggle button', () => {
+            expect(toggleButtonHarness).toBeTruthy();
+          });
+          it('should change input type when clicked', async () => {
+            await toggleButtonHarness.click();
+            const type = await inputHarness.getType();
+            expect(type).toBe('text');
+          });
+          it('should toggle aria-pressed when clicked', async () => {
+            const host = await toggleButtonHarness.host();
+            expect(await host.getAttribute('aria-pressed')).toBe('false');
+            await toggleButtonHarness.click();
+            expect(await host.getAttribute('aria-pressed')).toBe('true');
+          });
+          it('should display visibility_off icon initially', async () => {
+            const iconHarness = await passwordFormFieldLoader.getHarness(MatIconHarness);
+            const iconName = await iconHarness.getName();
+            expect(iconName).toBe('visibility_off');
+          });
+          it('should display visibility icon after click', async () => {
+            await toggleButtonHarness.click();
+            const iconHarness = await passwordFormFieldLoader.getHarness(MatIconHarness);
+            const iconName = await iconHarness.getName();
+            expect(iconName).toBe('visibility');
+          });
+        });
+        describe('when touched and hasError', () => {
+          it('should display a required error message', async () => {
+            loginComponent.password?.markAsTouched();
+            fixture.detectChanges();
+
+            const errors = await passwordFormFieldHarness.getErrors();
+            expect(errors.length).toBe(1);
+            expect(await errors[0].getText()).toContain('required');
+          });
+
+          it('should display a pattern error message', async () => {
+            loginComponent.password?.markAsTouched();
+            loginComponent.password?.setValue('123');
+            fixture.detectChanges();
+
+            const errors = await passwordFormFieldHarness.getErrors();
+            expect(errors.length).toBe(1);
+            expect(await errors[0].getText()).toContain('valid');
+          });
+        });
+      });
     });
     // describe('when status is register', () => {});
     // describe('checkFormEquality', () => {});

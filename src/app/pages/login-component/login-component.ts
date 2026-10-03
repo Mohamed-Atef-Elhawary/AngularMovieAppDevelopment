@@ -39,8 +39,8 @@ export class LoginComponent implements OnInit {
     return this.status() === 'login' ? 'Create An Account' : 'Already Have An Account';
   });
 
-  hidePass = signal(true);
-  hideConfirmPass = signal(true);
+  isPassHidden = signal(true);
+  isPassConfirmPassHidden = signal(true);
 
   constructor(
     private authService: AuthService,
@@ -89,11 +89,11 @@ export class LoginComponent implements OnInit {
     return this.loginForm.get('confirmPassword');
   }
 
-  toggleHidePass() {
-    this.hidePass.update((v) => !v);
+  toggleIsPassHidden() {
+    this.isPassHidden.update((v) => !v);
   }
-  toggleHideConfirmPass() {
-    this.hideConfirmPass.update((v) => !v);
+  toggleIsPassConfirmPassHidden() {
+    this.isPassConfirmPassHidden.update((v) => !v);
   }
 
   toggleStatus() {
