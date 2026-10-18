@@ -8,7 +8,13 @@ import { of, throwError } from 'rxjs';
 import { snakBarConfig } from '../../config/snakbar-config';
 import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
-import { HarnessLoader } from '@angular/cdk/testing';
+import {
+  BaseHarnessFilters,
+  ComponentHarness,
+  HarnessLoader,
+  HarnessPredicate,
+  TestElement,
+} from '@angular/cdk/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { MatInputHarness } from '@angular/material/input/testing';
 import { MatFormFieldHarness } from '@angular/material/form-field/testing';
@@ -26,7 +32,25 @@ interface MatSnackBarInterface {
 interface RouterInterface {
   navigate: Mock;
 }
+interface PasswordMismatchHarnessFilters extends BaseHarnessFilters {
+  text?: string | RegExp;
+}
+class PasswordMismatchHarness extends ComponentHarness {
+  static hostSelector = 'mat-error';
+  static with(
+    options: PasswordMismatchHarnessFilters = {},
+  ): HarnessPredicate<PasswordMismatchHarness> {
+    return new HarnessPredicate(PasswordMismatchHarness, options).addOption(
+      'text',
+      options.text,
+      (harness, text) => HarnessPredicate.stringMatches(harness.getText(), text),
+    );
+  }
 
+  async getText(): Promise<string> {
+    return (await this.host()).text();
+  }
+}
 describe('LoginComponent', () => {
   let loginComponent: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
@@ -191,9 +215,9 @@ describe('LoginComponent', () => {
     });
     describe('toggleHideConfirmPass', () => {
       it('should toggle hideConfirmPass value', () => {
-        loginComponent.isPassConfirmPassHidden.set(true);
-        loginComponent.toggleIsPassConfirmPassHidden();
-        expect(loginComponent.isPassConfirmPassHidden()).toBe(false);
+        loginComponent.isConfirmPassHidden.set(true);
+        loginComponent.toggleIsConfirmPassHidden();
+        expect(loginComponent.isConfirmPassHidden()).toBe(false);
       });
     });
     describe('toggleStatus', () => {
@@ -377,7 +401,7 @@ describe('LoginComponent', () => {
         );
         expect(passwordInput).toBeTruthy();
       });
-      it('should not display fulname form field', async () => {
+      it('should not display fullname form field', async () => {
         const fullNameInput = await loader.getHarnessOrNull(
           MatInputHarness.with({ selector: 'input[formControlName="fullName"]' }),
         );
@@ -502,18 +526,13 @@ describe('LoginComponent', () => {
         describe('when touched and hasError', () => {
           it('should display a required error message', async () => {
             loginComponent.password?.markAsTouched();
-            fixture.detectChanges();
-
             const errors = await passwordFormFieldHarness.getErrors();
             expect(errors.length).toBe(1);
             expect(await errors[0].getText()).toContain('required');
           });
-
           it('should display a pattern error message', async () => {
             loginComponent.password?.markAsTouched();
             loginComponent.password?.setValue('123');
-            fixture.detectChanges();
-
             const errors = await passwordFormFieldHarness.getErrors();
             expect(errors.length).toBe(1);
             expect(await errors[0].getText()).toContain('valid');
@@ -521,7 +540,241 @@ describe('LoginComponent', () => {
         });
       });
     });
-    // describe('when status is register', () => {});
-    // describe('checkFormEquality', () => {});
+    describe('when status is register', () => {
+      let fullNameHarness: MatFormFieldHarness;
+      let confirmPassLoader: HarnessLoader;
+      let confirmPassHarness: MatFormFieldHarness;
+      beforeEach(async () => {
+        loginComponent.toggleStatus();
+        fixture.detectChanges();
+        fullNameHarness = await loader.getHarness(
+          MatFormFieldHarness.with({
+            selector: 'mat-form-field:has(input[formControlName="fullName"])',
+          }),
+        );
+        confirmPassLoader = await loader.getChildLoader(
+          'mat-form-field:has(input[formControlName="confirmPassword"])',
+        );
+        confirmPassHarness = await loader.getHarness(
+          MatFormFieldHarness.with({
+            selector: 'mat-form-field:has(input[formControlName="confirmPassword"])',
+          }),
+        );
+      });
+      it('should display fullname form field', () => {
+        expect(fullNameHarness).toBeTruthy();
+      });
+      it('should display confirmPassword form field', () => {
+        expect(confirmPassHarness).toBeTruthy();
+      });
+      describe('full name', () => {
+        it('should contain a label', async () => {
+          const label = await fullNameHarness.getLabel();
+          expect(label).toContain('name');
+        });
+
+        describe('when touched and hasError', () => {
+          beforeEach(() => {
+            loginComponent.fullName?.markAsTouched();
+          });
+          it('should display a required error message', async () => {
+            const errors = await fullNameHarness.getErrors();
+            expect(await errors[0].getText()).toContain('required');
+          });
+          it('should display an invalid error message', async () => {
+            loginComponent.fullName?.setValue('123');
+            const errors = await fullNameHarness.getErrors();
+            expect(await errors[0].getText()).toContain('valid');
+          });
+        });
+        describe('when untouched and hasError', () => {
+          it('should not display a required error message', async () => {
+            expect.assertions(3);
+            expect(loginComponent.fullName?.hasError('required')).toBe(true);
+            expect(loginComponent.fullName?.untouched).toBe(true);
+            expect(await fullNameHarness.getErrors()).toEqual([]);
+          });
+          it('should not display an invalid error message', async () => {
+            expect.assertions(3);
+            loginComponent.fullName?.setValue('123');
+            expect(loginComponent.fullName?.hasError('pattern'));
+            expect(loginComponent.fullName?.untouched).toBe(true);
+            expect(await fullNameHarness.getErrors()).toEqual([]);
+          });
+        });
+      });
+      describe('confirm password', () => {
+        let inputHarness: MatInputHarness;
+        beforeEach(async () => {
+          inputHarness = await confirmPassLoader.getHarness(MatInputHarness);
+        });
+
+        it('should contain a label', async () => {
+          expect(await confirmPassHarness.getLabel()).toBe('confirm your password');
+        });
+
+        it('should be a type password initially', async () => {
+          expect(await inputHarness.getType()).toBe('password');
+        });
+
+        describe('toggle button', () => {
+          let toggleButtonHarness: MatButtonHarness;
+          beforeEach(async () => {
+            toggleButtonHarness = await confirmPassLoader.getHarness(MatButtonHarness);
+          });
+          it('should toggle input type when clicked', async () => {
+            expect.assertions(2);
+            expect(await inputHarness.getType()).toBe('password');
+            await toggleButtonHarness.click();
+            expect(await inputHarness.getType()).toBe('text');
+          });
+          it('should return to type password when clicked twice', async () => {
+            expect.assertions(2);
+
+            expect(await inputHarness.getType()).toBe('password');
+            await toggleButtonHarness.click();
+            await toggleButtonHarness.click();
+            expect(await inputHarness.getType()).toBe('password');
+          });
+          describe('aria-label', () => {
+            let host: TestElement;
+            beforeEach(async () => {
+              host = await toggleButtonHarness.host();
+            });
+            it('should contain aria-label "show password" initially', async () => {
+              expect(await host.getAttribute('aria-label')).toBe('show password');
+            });
+            it('should toggle aria-label to "hide password" when click', async () => {
+              await toggleButtonHarness.click();
+              expect(await host.getAttribute('aria-label')).toBe('hide password');
+            });
+          });
+          describe('aria-pressed', () => {
+            let host: TestElement;
+            beforeEach(async () => {
+              host = await toggleButtonHarness.host();
+            });
+            it('should contain aria-pressed "false" initially', async () => {
+              expect(await host.getAttribute('aria-pressed')).toBe('false');
+            });
+            it('should toggle aria-pressed to "true" when click', async () => {
+              await toggleButtonHarness.click();
+              expect(await host.getAttribute('aria-pressed')).toBe('true');
+            });
+          });
+          describe('mat icon', () => {
+            let icon: MatIconHarness;
+            beforeEach(async () => {
+              icon = await confirmPassLoader.getHarness(MatIconHarness);
+            });
+            it('should contain visibility_off icon initially', async () => {
+              expect(await icon.getName()).toBe('visibility_off');
+            });
+            it('should change icon to visibility when isConfirmPassHidden changed', async () => {
+              await toggleButtonHarness.click();
+              expect(await icon.getName()).toBe('visibility');
+            });
+          });
+        });
+        describe('when touched and hasError', () => {
+          it('should display a required error message', async () => {
+            loginComponent.confirmPassword?.markAsTouched();
+            expect(await confirmPassHarness.getTextErrors()).toEqual([
+              'Confirm password is required',
+            ]);
+          });
+          it('should display an invalid error message', async () => {
+            loginComponent.confirmPassword?.markAsTouched();
+            loginComponent.confirmPassword?.setValue('123');
+            expect(await confirmPassHarness.getTextErrors()).toEqual([
+              'Please enter a valid password',
+            ]);
+          });
+        });
+        describe('when untouched and hasError', () => {
+          it('should not display a required error message', async () => {
+            expect.assertions(3);
+            expect(loginComponent.confirmPassword?.untouched).toBe(true);
+            expect(loginComponent.confirmPassword?.hasError('required')).toBe(true);
+            expect(await confirmPassHarness.getTextErrors()).toEqual([]);
+          });
+          it('should not display an invalid error message', async () => {
+            expect.assertions(3);
+            loginComponent.confirmPassword?.setValue('123');
+            expect(loginComponent.confirmPassword?.untouched).toBe(true);
+            expect(loginComponent.confirmPassword?.hasError('pattern')).toBe(true);
+            expect(await confirmPassHarness.getTextErrors()).toEqual([]);
+          });
+        });
+      });
+    });
+    describe('password mismatch message', () => {
+      let passwordInputHarness: MatInputHarness;
+      let confirmPasswordInputHarness: MatInputHarness;
+      const equalityErrorMessage = 'Password and Confirm password must be equal';
+
+      const getMismatchError = () =>
+        loader.getHarnessOrNull(PasswordMismatchHarness.with({ text: equalityErrorMessage }));
+
+      const hasMismatchError = () => loginComponent.loginForm.hasError('passwordMismatch');
+      beforeEach(async () => {
+        loginComponent.toggleStatus();
+
+        passwordInputHarness = await loader.getHarness(
+          MatInputHarness.with({ selector: 'input[formControlName="password"]' }),
+        );
+        confirmPasswordInputHarness = await loader.getHarness(
+          MatInputHarness.with({ selector: 'input[formControlName="confirmPassword"]' }),
+        );
+      });
+
+      describe('when password and confirmPass are valid', () => {
+        it('should display an error message if they are not equal', async () => {
+          await passwordInputHarness.setValue('123456');
+          await confirmPasswordInputHarness.setValue('111111');
+          expect(await getMismatchError()).not.toBeNull();
+        });
+
+        it('should not display an error message if they are equal', async () => {
+          await passwordInputHarness.setValue('123456');
+          await confirmPasswordInputHarness.setValue('123456');
+          expect(await getMismatchError()).toBeNull();
+        });
+      });
+      describe('when password or confirmPass are not valid', () => {
+        it('should not display an equality error message if password is not valid', async () => {
+          expect.assertions(2);
+          await passwordInputHarness.setValue('123');
+          await confirmPasswordInputHarness.setValue('111111');
+          expect(hasMismatchError()).toBe(true);
+          expect(await getMismatchError()).toBeNull();
+        });
+        it('should not display an equality error message if confirm password is not valid', async () => {
+          expect.assertions(2);
+          await passwordInputHarness.setValue('123456');
+          await confirmPasswordInputHarness.setValue('111');
+          expect(hasMismatchError()).toBe(true);
+          expect(await getMismatchError()).toBeNull();
+        });
+      });
+      describe('when password and confirmPass equality status changes', () => {
+        it('should clear the passwordMismatch validation error when values become equal', async () => {
+          expect.assertions(2);
+          await passwordInputHarness.setValue('123456');
+          await confirmPasswordInputHarness.setValue('111111');
+          expect(hasMismatchError()).toBe(true);
+          await confirmPasswordInputHarness.setValue('123456');
+          expect(hasMismatchError()).toBe(false);
+        });
+        it('should hide the error message when valid values get equal', async () => {
+          expect.assertions(2);
+          await passwordInputHarness.setValue('123456');
+          await confirmPasswordInputHarness.setValue('111111');
+          expect(await getMismatchError()).not.toBeNull();
+          await confirmPasswordInputHarness.setValue('123456');
+          expect(await getMismatchError()).toBeNull();
+        });
+      });
+    });
   });
 });

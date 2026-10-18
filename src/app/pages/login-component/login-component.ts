@@ -40,7 +40,7 @@ export class LoginComponent implements OnInit {
   });
 
   isPassHidden = signal(true);
-  isPassConfirmPassHidden = signal(true);
+  isConfirmPassHidden = signal(true);
 
   constructor(
     private authService: AuthService,
@@ -71,11 +71,13 @@ export class LoginComponent implements OnInit {
     }
     return null;
   }
+
   checkFormEquality(): boolean {
-    let dirtyPass = this.password?.valid && this.password?.dirty;
-    let dirtyConfirmPass = this.confirmPassword?.valid && this.confirmPassword?.dirty;
-    return (dirtyPass && dirtyConfirmPass) || false;
+    let dirtyValidPass = this.password?.valid && this.password?.dirty;
+    let dirtyValidConfirmPass = this.confirmPassword?.valid && this.confirmPassword?.dirty;
+    return (dirtyValidPass && dirtyValidConfirmPass) || false;
   }
+
   get email() {
     return this.loginForm.get('email');
   }
@@ -92,8 +94,8 @@ export class LoginComponent implements OnInit {
   toggleIsPassHidden() {
     this.isPassHidden.update((v) => !v);
   }
-  toggleIsPassConfirmPassHidden() {
-    this.isPassConfirmPassHidden.update((v) => !v);
+  toggleIsConfirmPassHidden() {
+    this.isConfirmPassHidden.update((v) => !v);
   }
 
   toggleStatus() {

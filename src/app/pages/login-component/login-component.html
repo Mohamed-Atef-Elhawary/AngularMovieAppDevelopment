@@ -8,11 +8,11 @@
     @if (status() === 'register') {
       <mat-form-field appearance="outline" class="overflow-hidden py-2">
         <mat-label>Enter your name</mat-label>
-        <input matInput placeholder="Full Name" formControlName="fullName" />
+        <input matInput formControlName="fullName" />
         <mat-hint></mat-hint>
         @if (fullName?.touched && fullName?.hasError('required')) {
           <mat-error>Name is <strong>required</strong></mat-error>
-        } @else if (fullName?.hasError('pattern')) {
+        } @else if (fullName?.touched && fullName?.hasError('pattern')) {
           <mat-error>Please enter a valid name</mat-error>
         }
       </mat-form-field>
@@ -37,7 +37,7 @@
         matIconButton
         matSuffix
         (click)="toggleIsPassHidden()"
-        [attr.aria-label]="isPassHidden() ? 'show password' : 'Hide password'"
+        [attr.aria-label]="isPassHidden() ? 'show password' : 'hide password'"
         [attr.aria-pressed]="!isPassHidden()"
       >
         <mat-icon>{{ isPassHidden() ? 'visibility_off' : 'visibility' }}</mat-icon>
@@ -56,23 +56,23 @@
         <mat-label>confirm your password</mat-label>
         <input
           matInput
-          [type]="isPassConfirmPassHidden() ? 'password' : 'text'"
+          [type]="isConfirmPassHidden() ? 'password' : 'text'"
           formControlName="confirmPassword"
         />
         <button
           type="button"
           matIconButton
           matSuffix
-          (click)="toggleIsPassConfirmPassHidden()"
-          [attr.aria-label]="'Hide password'"
-          [attr.aria-pressed]="isPassConfirmPassHidden()"
+          [attr.aria-label]="isConfirmPassHidden() ? 'show password' : 'hide password'"
+          [attr.aria-pressed]="!isConfirmPassHidden()"
+          (click)="toggleIsConfirmPassHidden()"
         >
-          <mat-icon>{{ isPassConfirmPassHidden() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          <mat-icon>{{ isConfirmPassHidden() ? 'visibility_off' : 'visibility' }}</mat-icon>
         </button>
 
         <mat-hint></mat-hint>
         @if (confirmPassword?.touched && confirmPassword?.hasError('required')) {
-          <mat-error>confirm password is <strong>required</strong></mat-error>
+          <mat-error>Confirm password is <strong>required</strong></mat-error>
         } @else if (confirmPassword?.touched && confirmPassword?.hasError('pattern')) {
           <mat-error>Please enter a valid password</mat-error>
         }
