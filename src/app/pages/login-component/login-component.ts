@@ -54,6 +54,8 @@ export class LoginComponent implements OnInit {
 
   makeForm() {
     this.loginForm = this.fb.group(
+      //       wnKnown
+      // 123456
       {
         email: ['', [Validators.required, Validators.pattern(/^\w+@\w+\.\w{1,5}$/)]],
         password: ['', [Validators.required, Validators.pattern(/^\S.{4,}\S$/)]],

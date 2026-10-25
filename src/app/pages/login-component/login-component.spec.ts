@@ -382,8 +382,8 @@ describe('LoginComponent', () => {
       debugElement = fixture.debugElement;
     });
     it('should render the form', () => {
-      const formDebugElemnt = debugElement.query(By.css('form'));
-      expect(formDebugElemnt).toBeTruthy();
+      const formDebugElement = debugElement.query(By.css('form'));
+      expect(formDebugElement).toBeTruthy();
     });
     describe('when status is login', () => {
       it('should display "Login" text', () => {
@@ -455,7 +455,7 @@ describe('LoginComponent', () => {
         let toggleButtonHarness: MatButtonHarness;
         beforeEach(async () => {
           passwordFormFieldLoader = await loader.getChildLoader(
-            'mat-form-field :has(input[formControlName="password"])',
+            'mat-form-field:has(input[formControlName="password"])',
           );
           passwordFormFieldHarness = await loader.getHarness(
             MatFormFieldHarness.with({
@@ -497,9 +497,6 @@ describe('LoginComponent', () => {
         // });
 
         describe('toggle button', () => {
-          it('should contain toggle button', () => {
-            expect(toggleButtonHarness).toBeTruthy();
-          });
           it('should change input type when clicked', async () => {
             await toggleButtonHarness.click();
             const type = await inputHarness.getType();
@@ -597,7 +594,7 @@ describe('LoginComponent', () => {
           it('should not display an invalid error message', async () => {
             expect.assertions(3);
             loginComponent.fullName?.setValue('123');
-            expect(loginComponent.fullName?.hasError('pattern'));
+            expect(loginComponent.fullName?.hasError('pattern')).toBe(true);
             expect(loginComponent.fullName?.untouched).toBe(true);
             expect(await fullNameHarness.getErrors()).toEqual([]);
           });
@@ -776,5 +773,126 @@ describe('LoginComponent', () => {
         });
       });
     });
+
+    describe('submit button', () => {
+      let submitBtnHarness: MatButtonHarness;
+      let emailInput: MatInputHarness;
+      let passwordInput: MatInputHarness;
+
+      beforeEach(async () => {
+        submitBtnHarness = await loader.getHarness(
+          MatButtonHarness.with({
+            selector: `button[disabled=${loginComponent.loginForm.invalid}]`,
+            // selector: `button[type="submit"]`,
+          }),
+        );
+
+        emailInput = await loader.getHarness(
+          MatInputHarness.with({ selector: 'input[formControlName="email"]' }),
+        );
+        passwordInput = await loader.getHarness(
+          MatInputHarness.with({ selector: 'input[formControlName="password"]' }),
+        );
+      });
+
+      describe('when status is login', () => {
+        it('should display "login" as its text', async () => {
+          expect(await submitBtnHarness.getText()).toBe('login');
+        });
+        describe('when the form is invalid', () => {
+          it('should be disabled', async () => {
+            expect.assertions(2);
+            expect(loginComponent.loginForm.invalid).toBe(true);
+            expect(await submitBtnHarness.isDisabled()).toBe(true);
+          });
+        });
+        describe('when the form is valid', () => {
+          let fillValidLoginForm: () => Promise<void>;
+          beforeEach(() => {
+            fillValidLoginForm = async () => {
+              await emailInput.setValue('example@gmail.com');
+              await passwordInput.setValue('123456');
+            };
+          });
+          it('should be enabled', async () => {
+            expect.assertions(2);
+            await fillValidLoginForm();
+            expect(loginComponent.loginForm.valid).toBe(true);
+            expect(await submitBtnHarness.isDisabled()).toBe(false);
+          });
+          it('should call authService.login with the form value when clicked', async () => {
+            expect.assertions(3);
+            mockAuthService.login.mockReturnValue(of({ user: { uid: '123' } }));
+            await fillValidLoginForm();
+            expect(loginComponent.loginForm.valid).toBe(true);
+            await submitBtnHarness.click();
+            expect(mockAuthService.login).toHaveBeenCalledOnce();
+            expect(mockAuthService.login).toHaveBeenCalledWith({
+              email: 'example@gmail.com',
+              password: '123456',
+            });
+          });
+        });
+      });
+
+      describe('when status is register', () => {
+        let fillRegisterForm: (confirmPassValue: string) => Promise<void>;
+        beforeEach(() => {
+          loginComponent.toggleStatus();
+          fillRegisterForm = async (confirmPassValue: string) => {
+            const fullNameInput = await loader.getHarness(
+              MatInputHarness.with({ selector: 'input[formControlName="fullName"]' }),
+            );
+            const confirmPasswordInput = await loader.getHarness(
+              MatInputHarness.with({ selector: 'input[formControlName="confirmPassword"]' }),
+            );
+            await fullNameInput.setValue('unknown');
+            await emailInput.setValue('example@gmail.com');
+            await passwordInput.setValue('123456');
+            await confirmPasswordInput.setValue(confirmPassValue);
+          };
+        });
+        it('should display "register" as its text', async () => {
+          expect(await submitBtnHarness.getText()).toBe('register');
+        });
+        describe('when the form is invalid', () => {
+          it('should be disabled', async () => {
+            expect.assertions(2);
+            expect(loginComponent.loginForm.invalid).toBe(true);
+            expect(await submitBtnHarness.isDisabled()).toBe(true);
+          });
+          it('should be disabled when the passwords do not match', async () => {
+            expect.assertions(2);
+            await fillRegisterForm('111111');
+            expect(loginComponent.loginForm.hasError('passwordMismatch')).toBe(true);
+            expect(await submitBtnHarness.isDisabled()).toBe(true);
+          });
+        });
+        describe('when the form is valid', () => {
+          it('should be enabled', async () => {
+            await fillRegisterForm('123456');
+            expect(await submitBtnHarness.isDisabled()).toBe(false);
+          });
+          it('should call authService.register with the form value when clicked', async () => {
+            expect.assertions(3);
+            mockAuthService.register.mockReturnValue(of({ user: { uid: '123' } }));
+            await fillRegisterForm('123456');
+            await submitBtnHarness.click();
+            expect(loginComponent.loginForm.valid).toBe(true);
+            expect(mockAuthService.register).toHaveBeenCalledOnce();
+            expect(mockAuthService.register).toHaveBeenCalledWith({
+              fullName: 'unknown',
+              email: 'example@gmail.com',
+              password: '123456',
+              confirmPassword: '123456',
+            });
+          });
+        });
+      });
+    });
+    // describe.todo('toggle status button', () => {
+    //   it.todo('should toggle status when clicked', () => {});
+    //   it.todo('should display the current status text when clicked', () => {});
+    // });
   });
 });
