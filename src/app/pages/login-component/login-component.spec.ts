@@ -85,7 +85,7 @@ describe('LoginComponent', () => {
     vi.clearAllMocks();
   });
 
-  describe.skip('component logic', () => {
+  describe('component logic', () => {
     it('should create', () => {
       expect(loginComponent).toBeTruthy();
     });
@@ -782,8 +782,8 @@ describe('LoginComponent', () => {
       beforeEach(async () => {
         submitBtnHarness = await loader.getHarness(
           MatButtonHarness.with({
-            selector: `button[disabled=${loginComponent.loginForm.invalid}]`,
-            // selector: `button[type="submit"]`,
+            // selector: `button[disabled=${loginComponent.loginForm.invalid}]`,
+            selector: `button[type="submit"]`,
           }),
         );
 
@@ -890,9 +890,50 @@ describe('LoginComponent', () => {
         });
       });
     });
-    // describe.todo('toggle status button', () => {
-    //   it.todo('should toggle status when clicked', () => {});
-    //   it.todo('should display the current status text when clicked', () => {});
-    // });
+    describe('toggle status button', () => {
+      let statusTogglerButton: DebugElement;
+      let getTextContent: () => string;
+      beforeEach(() => {
+        statusTogglerButton = debugElement.query(By.css('button[id="toggleStatusButton"]'));
+
+        getTextContent = () => statusTogglerButton.nativeElement.textContent.trim();
+      });
+      it('should be exist', () => {
+        expect(statusTogglerButton).not.toBeNull();
+      });
+      it('should toggle status when clicked', () => {
+        expect.assertions(2);
+        expect(loginComponent.status()).toBe('login');
+        statusTogglerButton.nativeElement.click();
+        expect(loginComponent.status()).toBe('register');
+      });
+      it('should return to login status when clicked twice', () => {
+        expect.assertions(2);
+        expect(loginComponent.status()).toBe('login');
+        statusTogglerButton.nativeElement.click();
+        statusTogglerButton.nativeElement.click();
+        expect(loginComponent.status()).toBe('login');
+      });
+
+      it('should display "Already Have An Account" after being clicked', () => {
+        expect.assertions(2);
+        expect(getTextContent()).toBe('Create An Account');
+        statusTogglerButton.nativeElement.click();
+        fixture.detectChanges();
+        expect(getTextContent()).toBe('Already Have An Account');
+      });
+
+      it('should display "Create An Account" after being clicked twice', () => {
+        expect.assertions(2);
+        expect(getTextContent()).toBe('Create An Account');
+
+        statusTogglerButton.nativeElement.click();
+        fixture.detectChanges();
+        statusTogglerButton.nativeElement.click();
+        fixture.detectChanges();
+
+        expect(getTextContent()).toBe('Create An Account');
+      });
+    });
   });
 });
