@@ -1,12 +1,12 @@
 //HomeComponent.ts
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, linkedSignal, signal } from '@angular/core';
 import { OmdbMovieSearch } from '../../interfaces/omdb-movie';
 import { MovieService } from '../../services/movie-service';
 import { MovieCardComponent } from '../../components/movie-card-component/movie-card-component';
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MyCustomPaginatorIntl } from '../../services/my-custom-paginator-init';
 import { MovieIntegrationService } from '../../services/movie-integration-service';
-import { debounce, debounceTime, distinct, distinctUntilChanged } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-home-component',
@@ -18,17 +18,21 @@ import { debounce, debounceTime, distinct, distinctUntilChanged } from 'rxjs';
 })
 export class HomeComponent {
   storedMovieList = signal<OmdbMovieSearch[]>([]);
-  movieList = signal<OmdbMovieSearch[]>([]);
+
+  movieList = linkedSignal<OmdbMovieSearch[]>(() => this.storedMovieList());
+
   constructor(
     private movieIntegrationService: MovieIntegrationService,
     private movieService: MovieService,
   ) {}
+
   ngOnInit() {
     this.movieIntegrationService.getMovies();
+
     this.movieIntegrationService.movieList.subscribe((movies) => {
       this.storedMovieList.set(movies);
-      this.movieList.set(movies);
     });
+
     this.movieService.searchValue$
       .pipe(debounceTime(1000), distinctUntilChanged())
       .subscribe((searchTitle: string) => {

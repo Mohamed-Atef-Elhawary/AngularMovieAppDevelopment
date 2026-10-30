@@ -10,6 +10,7 @@ export class MyCustomPaginatorIntl implements MatPaginatorIntl {
   lastPageLabel: string = $localize`Last page`;
   nextPageLabel: string = $localize`Next page`;
   previousPageLabel: string = $localize`Previous page`;
+
   getRangeLabel: (page: number, pageSize: number, length: number) => string = (
     page: number,
     pageSize: number,
