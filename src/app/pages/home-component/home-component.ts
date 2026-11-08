@@ -1,4 +1,3 @@
-//HomeComponent.ts
 import { Component, computed, linkedSignal, signal } from '@angular/core';
 import { OmdbMovieSearch } from '../../interfaces/omdb-movie';
 import { MovieService } from '../../services/movie-service';
