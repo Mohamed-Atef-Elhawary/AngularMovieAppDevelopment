@@ -50,7 +50,7 @@ export class HomeComponent {
 
   totalResults = computed<number>(() => this.movieIntegrationService.totalResults());
 
-  onPageChange(event: PageEvent) {
+  onPageNumberChange(event: PageEvent) {
     this.movieIntegrationService.pageNumbersub$.next(event.pageIndex + 1);
   }
 }

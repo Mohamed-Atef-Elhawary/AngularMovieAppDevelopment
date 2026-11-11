@@ -7,6 +7,11 @@ import { OmdbMovieSearch } from '../../interfaces/omdb-movie';
 import { BehaviorSubject, first, Subject } from 'rxjs';
 import { MovieCardComponent } from '../../components/movie-card-component/movie-card-component';
 import { By } from '@angular/platform-browser';
+import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
+import { MatPaginatorHarness } from '@angular/material/paginator/testing';
+import { HarnessLoader } from '@angular/cdk/testing';
+import { MatPaginatorIntl } from '@angular/material/paginator';
+import { MyCustomPaginatorIntl } from '../../services/my-custom-paginator-init';
 
 @Component({ selector: 'app-movie-card-component', template: '' })
 class MockMovieCardComponent {
@@ -35,6 +40,7 @@ describe('HomeComponent', () => {
   let homeComponent: HomeComponent;
   let mockMovieIntegrationService: MockMovieIntegrationService;
   let mockMovieService: MockMovieService;
+
   const MOVIE_LIST: OmdbMovieSearch[] = [
     { imdbID: 'm1', isFavorite: false, Poster: 'poster1', Title: 'title1', Type: 't', Year: '1' },
     { imdbID: 'm2', isFavorite: false, Poster: 'poster2', Title: 'title2', Type: 't', Year: '2' },
@@ -169,6 +175,34 @@ describe('HomeComponent', () => {
         vi.advanceTimersByTime(1);
         fixture.detectChanges();
         expect(movieCardComponents().length).toBe(1);
+      });
+    });
+  });
+
+  describe('paginator', () => {
+    let loader: HarnessLoader;
+    let paginatorHarness: MatPaginatorHarness;
+    beforeEach(async () => {
+      loader = TestbedHarnessEnvironment.loader(fixture);
+      paginatorHarness = await loader.getHarness(MatPaginatorHarness);
+    });
+    describe('when page number changes', () => {
+      it('should update page number when move back and forth', async () => {
+        mockMovieIntegrationService.totalResults.set(100);
+
+        await paginatorHarness.goToNextPage();
+        expect(mockMovieIntegrationService.pageNumbersub$.value).toBe(2);
+        await paginatorHarness.goToPreviousPage();
+        expect(mockMovieIntegrationService.pageNumbersub$.value).toBe(1);
+      });
+    });
+    describe('number of pages', () => {
+      it('should display the number of page', async () => {
+        mockMovieIntegrationService.totalResults.set(89);
+        const label = (await paginatorHarness.getRangeLabel()).split(' ');
+        const numberOfPage = label[label.length - 1];
+
+        expect(numberOfPage).toBe('9');
       });
     });
   });
